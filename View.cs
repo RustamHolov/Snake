@@ -3,7 +3,7 @@ using System.Text;
 public class View
 {
 
-    public static string BuildField(int width = 50, int height = 20, (int x, int y)? coords = null, string? insert = null, char symbol = ' ')
+    public static string BuildField(int width = 50, int height = 20, (int x, int y)? coords = null, string? insert = null, char symbol = '○')
     {
         char _symbol = symbol;
         StringBuilder buffered = new StringBuilder();
@@ -22,11 +22,10 @@ public class View
             }
         }
 
-
         // Build the border and content
+
         for (int i = 0; i < height; i++) // |
         {
-
             string FillContent(string? content = null)
             {
                 string tempContent = "";
@@ -54,28 +53,25 @@ public class View
         }
 
         // Build the bottom border
+
         string bottomBorder = "▀" + new string('▀', width ) + "▀";
         buffered.Append(bottomBorder);
         return buffered.ToString();
     }
+    int x = 0;
+    int y = 0;
     public void Display(){
-        
-        while(true){
-            Console.Clear();
-            int x = 0;
-            int y = 0;
-            Console.WriteLine(BuildField(insert: "N\nI\nG\nG\nA", coords: (x, y)));
-            ConsoleKey key;
-            key = Console.ReadKey().Key;
-            if (key == ConsoleKey.D){
-                x++;
-
-            }
-            if(key == ConsoleKey.S){
-                y++;
-            }
+        Console.CursorVisible = false;
+        Console.Clear();
+        Console.WriteLine(BuildField(insert: "●●●\n●●●\n●●●", coords: (x, y)));
+        switch (Console.ReadKey(true).Key){
+            case ConsoleKey.W : y--;break;
+            case ConsoleKey.S: y++; break;
+            case ConsoleKey.A: x--; break;
+            case ConsoleKey.D: x++; break;
         }
-        
+
+        Display();
     }
 
 }
