@@ -50,7 +50,6 @@ public class View
                     // **Critical Stability Check:** Ensure insert fits within bounds
                     if (insertX < 0 )  
                     {
-                        Console.WriteLine($"{insertX},{insertY}");
                         insertX = width;
                         //Console.Error.WriteLine($"Error: Insert content (Width:{insertWidth}, Height:{insertHeight}) does not fit at coordinates ({insertX}, {insertY}) within the field (Width:{width}, Height:{height}).");
                         // Option 1: Disable insert if it doesn't fit
@@ -60,20 +59,17 @@ public class View
                         // throw new ArgumentException("Insert content does not fit within the specified field dimensions and coordinates.");
                     }
                     if (insertY < 0){
-                        Console.WriteLine($"{insertX},{insertY}");
                         insertY = height - insertHeight;
                     }
                     if (insertX + insertWidth > width){
-                        Console.WriteLine($"{insertX},{insertY}");
                         insertX = 0 + insertWidth;
                     }
                     if (insertY + insertHeight > height){
-                        Console.WriteLine($"{insertX},{insertY}");
                         insertY = 0 + insertHeight;
                     }
 
 
-                }
+                }   
                 else
                 {
                     // Insert string was provided but had no printable width (e.g. only newlines)
@@ -139,11 +135,19 @@ public class View
 
         return buffered.ToString();
     }
+    public static void DisplayMatrix(string[,] arg){
+        for(int i = 0; i < arg.GetLength(0); i++){
+            for(int j = 0; j < arg.GetLength(1); j++){
+                Console.Write(arg[i,j]);
+            }
+            Console.WriteLine();
+        }
+    }
     int x = 0;
     int y = 0;
     public void Display(){
         Console.CursorVisible = false;
-        Console.Clear();
+        Console.SetCursorPosition(0,0);
         Console.WriteLine(BuildField(insert: " - ", coords: (x, y)));
         switch (Console.ReadKey(true).Key){
             case ConsoleKey.W: y--; break;
