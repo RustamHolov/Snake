@@ -6,14 +6,17 @@ class Program
     {
         Console.OutputEncoding = Encoding.UTF8;
         //View view = new View();
-        Field field = new Field(7, 7, 3);
+        Field field = new Field(15, 15, 3);
         field.PlaceAll();
-        field.Place(new Cell(3, "🔳"), 12);
+        for(int i = 0; i < 220; i++){
+            field.SpawnFood();
+        }
         Console.WriteLine(field.Cells.Count);
         foreach(var kvp in field.CellsLinks){
             Console.WriteLine($"{kvp.Key}: {kvp.Value}");
         }
         View.DisplayMatrix(field.Matrix);
+        Console.WriteLine(new Cell(5, '░').Content);
         //view.Display();
     }
 }

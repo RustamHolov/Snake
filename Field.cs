@@ -5,7 +5,7 @@ public class Field : IRenderable
     public int Size {get; set;}
     private string _content = string.Empty;
     readonly List<Cell> _cells;
-    readonly string[,] _matrix;
+    readonly char[,] _matrix;
     Dictionary<int, (int, int)> _cellLinsk;
     public Dictionary<int,(int, int)> CellsLinks {get => _cellLinsk; set{_cellLinsk = value;}}
     public Field (int height, int width, int cellsSize){
@@ -13,7 +13,7 @@ public class Field : IRenderable
         Height = height;
         Width = width * 2;
         _cells = [.. Enumerable.Repeat(new Cell(cellsSize), height * width)];
-        _matrix = new string[Height * cellsSize, Width * cellsSize];
+        _matrix = new char[Height * cellsSize, Width * cellsSize];
         _cellLinsk = InitialiseLinks();
         FillField();
     }
@@ -22,10 +22,9 @@ public class Field : IRenderable
     public Field() : this(cellsSize:1){}
 
     public string Content { get => _content; set{ _content = value;}}
-    public char BorderType { get; set; }
     public List<Cell> Cells {get => _cells;}
 
-    public string[,] Matrix {get => _matrix;}
+    public char[,] Matrix {get => _matrix;}
     public int Height {get; set;}
 
     public int Width { get; set; }
@@ -58,7 +57,7 @@ public class Field : IRenderable
     }
     public void Place(Cell element, int position){
         if(_cellLinsk.TryGetValue(position, out (int x, int y) coordinates)){
-            string[,] insert = element.ContentField;
+            char[,] insert = element.ContentField;
             for (int i = coordinates.x; i < insert.GetLength(0) + coordinates.x; i++)
             {
                 for (int j = coordinates.y; j < insert.GetLength(1) + coordinates.y; j++)
@@ -66,13 +65,14 @@ public class Field : IRenderable
                     Matrix[i, j] = insert[i - coordinates.x, j - coordinates.y];
                 }
             }
+            _cells[position] = element;
         }else{
             throw new ArgumentOutOfRangeException($"Position not found: {position}");
         }
         
     }
-    public bool CouldBePlaced(Cell element, (int x, int y) coordinates){
-            return false;
+    public bool CouldBePlaced(int position){
+           return _cells[position].HasContent;
     }
     public void PlaceAll(){
         for(int i = 0; i < _cells.Count; i++){
@@ -82,9 +82,22 @@ public class Field : IRenderable
     public void FillField(){
         for(int i = 0; i < _matrix.GetLength(0); i++){
             for (int j = 0; j < _matrix.GetLength(1); j++){
-                _matrix[i,j] = "*";
+                _matrix[i,j] = '*';
             }
         }
+    }
+    public int GetRandomPosition(){
+        return new Random().Next(0, _cells.Count);
+    }
+    public void SpawnFood(){
+        Cell food = new Cell(Size, '░');
+        int spawn;
+        do
+        {
+            spawn = GetRandomPosition();
+        } while (CouldBePlaced(spawn));
+        _cells[spawn] = food;
+        Place(food, spawn);
     }
 
 }

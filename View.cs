@@ -135,7 +135,7 @@ public class View
 
         return buffered.ToString();
     }
-    public static void DisplayMatrix(string[,] arg){
+    public static void DisplayMatrix(char[,] arg){
         for(int i = 0; i < arg.GetLength(0); i++){
             for(int j = 0; j < arg.GetLength(1); j++){
                 Console.Write(arg[i,j]);
