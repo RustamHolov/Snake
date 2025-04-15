@@ -16,18 +16,17 @@ class Program
             if (Console.KeyAvailable){
                 direction = Console.ReadKey(true).Key switch
                 {
-                    ConsoleKey.W or ConsoleKey.UpArrow => Vector.Up,
-                    ConsoleKey.S or ConsoleKey.DownArrow => Vector.Down,
-                    ConsoleKey.A or ConsoleKey.LeftArrow => Vector.Left,
-                    ConsoleKey.D or ConsoleKey.RightArrow => Vector.Right,
+                    ConsoleKey.W or ConsoleKey.UpArrow => direction == Vector.Down ? Vector.Down : Vector.Up,
+                    ConsoleKey.S or ConsoleKey.DownArrow => direction == Vector.Up ? Vector.Up : Vector.Down,
+                    ConsoleKey.A or ConsoleKey.LeftArrow => direction == Vector.Right ? Vector.Right : Vector.Left,
+                    ConsoleKey.D or ConsoleKey.RightArrow => direction == Vector.Left ? Vector.Left : Vector.Right,
                     _ => throw new Exception("fail button")
                 };
             }
             Console.SetCursorPosition(0,0);
             View.DisplayMatrix(field.Matrix);
-            
             field.MoveSnake(direction);
-            Thread.Sleep(100);
+            Thread.Sleep(50);
         }
 
 

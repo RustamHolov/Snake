@@ -1,4 +1,5 @@
-public enum Vector{
+public enum Vector
+{
     Left,
     Right,
     Up,
@@ -14,7 +15,7 @@ public class SnakeModel
     private Cell _body;
     private Cell _tail;
     public List<Cell> Parts { get => _parts; set { _parts = value; } }
-    public Vector MoveDirection {get => _moveDirection; set {_moveDirection = value;}}
+    public Vector MoveDirection { get => _moveDirection; set { _moveDirection = value; } }
     public SnakeModel(int size)
     {
         _cellSize = size;
@@ -24,7 +25,8 @@ public class SnakeModel
         _parts = [_head, _body, _tail];
     }
 
-    public void Move(){
+    public void Move()
+    {
     }
 
 
