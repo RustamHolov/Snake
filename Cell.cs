@@ -9,20 +9,21 @@ public class Cell : IRenderable
     public int Width {get; set;}
 
     public int Size {get; set;}
+    private readonly bool _hasBorders;
     public string Content { get => _content; set { _content = value; } }
     private readonly char[,] _contentField; 
     private string _content = string.Empty;
     private bool _hasContent;
-    public Cell(int size, char background){
+    public Cell(int size, bool empty = true, bool withBorders = true){
         Size = size;
         Height = size;
         Width = size * 2;
+        _hasBorders = withBorders;
         _contentField = new char[Height, Width];
-        _content = Render(background);
-        _hasContent = background != ' ';
+        _content = Render();
+        _hasContent = !empty;
         FillField();
     }
-    public Cell(int size) : this(size, ' ') { }
     public Cell() : this(3) { }
     
     public bool HasContent { get => _hasContent;}
@@ -33,16 +34,24 @@ public class Cell : IRenderable
         Height = Size;
         Width = Size * 2;
     }
-    public string Render(char background)
+    public virtual string Render()
     {
         StringBuilder builder = new StringBuilder();
-        builder.AppendLine("┌" + new string('─', Width-2)+ "┐");
-        for(int i = 0; i < Height - 2; i++){
-            builder.AppendLine("│" + new string(background, Width -2) + "│");
+        if(_hasBorders){
+            builder.AppendLine("┌" + new string('─', Width - 2) + "┐");
+            for (int i = 0; i < Height - 2; i++)
+            {
+                builder.AppendLine("│" + new string(' ', Width - 2) + "│");
+            }
+            builder.AppendLine("└" + new string('─', Width - 2) + "┘");
+        }else{
+            for(int i = 0; i < Height; i++){
+                builder.AppendLine(new string(_hasContent ? ' ' : '█', Width));
+            }
         }
-        builder.AppendLine("└" + new string('─', Width-2)+ "┘");
         return builder.ToString();
     }
+    
     private void FillField(){
         string[] lines = Content.Split('\n');
         for(int i = 0; i < _contentField.GetLength(0); i++){
@@ -53,5 +62,5 @@ public class Cell : IRenderable
         }
     }
 
-    public string Render() => Render(' ');
+    
 }
