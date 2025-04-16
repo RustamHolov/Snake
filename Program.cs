@@ -9,8 +9,6 @@ class Program
         Console.Clear();
         //View view = new View();
         Field field = new Field(12, 12, 2);
-        field.PlaceAll();
-        field.SpawnFood();
         Vector direction = Vector.Right;
         while (true){
             if (Console.KeyAvailable){
@@ -24,9 +22,15 @@ class Program
                 };
             }
             Console.SetCursorPosition(0,0);
-            View.DisplayMatrix(field.Matrix);
-            field.MoveSnake(direction);
-            Thread.Sleep(50);
+            Console.WriteLine(View.DisplayMatrix(field.Matrix));
+            try
+            {
+                field.MoveSnake(direction);
+            } catch (Exception e){
+                Console.WriteLine(e.Message);
+                break;
+            }
+            Thread.Sleep(100);
         }
 
 

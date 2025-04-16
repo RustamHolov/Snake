@@ -31,7 +31,9 @@ public class Field : IRenderable
         _cells = InitialiseCells(height, width);
         _matrix = new char[Height * Size, Width * Size];
         _cellLinsk = InitialiseLinks();
+        PlaceAll();
         PlaceSnakeDefault();
+        SpawnFood();
     }
     public Field(int height, int width) : this(height, width, 1) { }
     public Field(int cellsSize) : this(5, 5, cellsSize) { }
@@ -59,7 +61,7 @@ public class Field : IRenderable
         {
             for (int j = 0; j < width; j++)
             {
-                temp[i, j] = new Cell(_cellSize);
+                temp[i, j] = new Cell(_cellSize, empty: true);
             }
         }
         return temp;
@@ -98,9 +100,9 @@ public class Field : IRenderable
         }
 
     }
-    public bool CouldBePlaced((int x, int y) position)
+    public bool CellIsEmpty((int x, int y) position)
     {
-        return _cells[position.x, position.y].HasContent;
+        return _cells[position.x, position.y].Empty;
     }
     public void PlaceAll()
     {
@@ -141,6 +143,10 @@ public class Field : IRenderable
             Vector.Down => _headPosition.x + 1 < _height ? (_headPosition.x + 1, _headPosition.y) : (0, _headPosition.y),
             _ => _headPosition
         };
+        bool isFood = !CellIsEmpty(_newHeadPosition);
+        if(_snakePositions.ContainsKey(_newHeadPosition)){
+            throw new Exception("Game Over");
+        }
         Place(_headCell, _newHeadPosition);
         _newSnakePositions.Add(_newHeadPosition, _headCell);
         foreach (((int x, int y) coords, Cell cell) in _snakePositions.Take(_snakePositions.Count - 1).Reverse().ToDictionary())
@@ -150,7 +156,14 @@ public class Field : IRenderable
             _newSnakePositions.Add(_headPosition, cell);
             _headPosition = previousPosition;
         }
-        Place(new Cell(Size), _tailPosition);
+        if(isFood){
+            Cell extraPart = new Cell(Size, empty: false);
+            Place(extraPart, _tailPosition);
+            _newSnakePositions.Add(_tailPosition, extraPart);
+            SpawnFood();
+        }else{
+            Place(new Cell(Size), _tailPosition);
+        }
         _snakePositions = _newSnakePositions.Reverse().ToDictionary();
         Snake.MoveDirection = direction;
     }
@@ -161,7 +174,7 @@ public class Field : IRenderable
         do
         {
             spawn = GetRandomPosition();
-        } while (CouldBePlaced(spawn));
+        } while (!CellIsEmpty(spawn));
         _cells[spawn.x, spawn.y] = food;
         Place(food, spawn);
     }

@@ -135,13 +135,53 @@ public class View
 
         return buffered.ToString();
     }
-    public static void DisplayMatrix(char[,] arg){
-        for(int i = 0; i < arg.GetLength(0); i++){
-            for(int j = 0; j < arg.GetLength(1); j++){
-                Console.Write(arg[i,j]);
-            }
-            Console.WriteLine();
+    public static string DisplayMatrix(char[,] matrix){
+        if (matrix == null || matrix.Length == 0)
+        {
+            return "Matrix is null or empty.";
         }
+
+        int rows = matrix.GetLength(0);
+        int cols = matrix.GetLength(1);
+
+        // Calculate the maximum string length in the matrix for padding
+        int maxStringLength = 0;
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                // In this case, we are dealing with chars, so the max length is 1.
+                maxStringLength = 1;
+            }
+        }
+
+        // Calculate total width of the box
+        int boxWidth = cols * (maxStringLength + 0) + 2; // +2 for the box borders.  No padding between chars.
+
+        StringBuilder result = new StringBuilder();
+
+        // Draw top border
+        result.Append("╔");
+        result.Append(new string('═', boxWidth - 2));
+        result.AppendLine("╗");
+
+        // Draw matrix content with side borders
+        for (int i = 0; i < rows; i++)
+        {
+            result.Append('║'); // Left border
+            for (int j = 0; j < cols; j++)
+            {
+                result.Append(matrix[i, j]);
+            }
+            result.AppendLine("║"); // Right border
+        }
+
+        // Draw bottom border
+        result.Append("╚");
+        result.Append(new string('═', boxWidth - 2));
+        result.AppendLine("╝");
+
+        return result.ToString();
     }
     int x = 0;
     int y = 0;

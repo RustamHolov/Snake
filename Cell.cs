@@ -9,25 +9,24 @@ public class Cell : IRenderable
     public int Width { get; set; }
 
     public int Size { get; set; }
-    private readonly bool _hasBorders;
     public string Content { get => _content; set { _content = value; } }
     private readonly char[,] _contentField;
     private string _content = string.Empty;
     private bool _empty;
-    public Cell(int size, bool empty = true, bool withBorders = true)
+    public Cell(int size, bool empty)
     {
         Size = size;
         Height = size;
         Width = size * 2;
-        _hasBorders = withBorders;
+        _empty = empty;
         _contentField = new char[Height, Width];
         _content = Render();
-        _empty = empty;
         FillField();
     }
+    public Cell(int size) : this(size, true) { }
     public Cell() : this(3) { }
 
-    public bool HasContent { get => _empty; }
+    public virtual bool Empty { get => _empty; }
     public char[,] ContentField { get => _contentField; }
 
     public void SetSize(int newSize)
@@ -39,20 +38,18 @@ public class Cell : IRenderable
     public virtual string Render()
     {
         StringBuilder builder = new StringBuilder();
-        if (_hasBorders)
+        if (Empty)
         {
-            builder.AppendLine("┌" + new string('─', Width - 2) + "┐");
-            for (int i = 0; i < Height - 2; i++)
+            for (int i = 0; i < Height; i++)
             {
-                builder.AppendLine("│" + new string(' ', Width - 2) + "│");
+                builder.AppendLine(new string(' ', Width ) );
             }
-            builder.AppendLine("└" + new string('─', Width - 2) + "┘");
         }
         else
         {
             for (int i = 0; i < Height; i++)
             {
-                builder.AppendLine(new string(_empty ? ' ' : '█', Width));
+                builder.AppendLine(new string('█', Width));
             }
         }
         return builder.ToString();

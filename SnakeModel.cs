@@ -19,9 +19,9 @@ public class SnakeModel
     public SnakeModel(int size)
     {
         _cellSize = size;
-        _head = new Cell(_cellSize, empty: false, withBorders: false);
-        _body = new Cell(_cellSize, empty: false, withBorders: false);
-        _tail = new Cell(_cellSize, empty: false, withBorders: false);
+        _head = new Cell(_cellSize, empty: false);
+        _body = new Cell(_cellSize, empty: false);
+        _tail = new Cell(_cellSize, empty: false);
         _parts = [_head, _body, _tail];
     }
 
