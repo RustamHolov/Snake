@@ -4,14 +4,22 @@ class Program
 {
     static void Main(string[] args)
     {
+        const int CellSize = 1;
+        int Rows = Console.WindowWidth / CellSize - 110 * CellSize;
+        int Cols = Console.WindowHeight / CellSize - 10 * CellSize;
+        Console.Title = "Snake";
         Console.OutputEncoding = Encoding.UTF8;
         Console.CursorVisible = false;
         Console.Clear();
         //View view = new View();
-        Field field = new Field(12, 12, 2);
-        Vector direction = Vector.Right;
-        while (true){
-            if (Console.KeyAvailable){
+        Field field = new Field(Cols, Rows, CellSize);
+        Vector direction = Vector.NotMoving;
+        Console.SetCursorPosition(0, 0);
+        Console.WriteLine(View.DisplayMatrix(field.Canvas));
+        while (true)
+        {
+            if (Console.KeyAvailable)
+            {
                 direction = Console.ReadKey(true).Key switch
                 {
                     ConsoleKey.W or ConsoleKey.UpArrow => direction == Vector.Down ? Vector.Down : Vector.Up,
@@ -21,16 +29,22 @@ class Program
                     _ => throw new Exception("fail button")
                 };
             }
-            Console.SetCursorPosition(0,0);
-            Console.WriteLine(View.DisplayMatrix(field.Matrix));
+            
             try
             {
-                field.MoveSnake(direction);
-            } catch (Exception e){
+                field.Snake.Move(direction);
+                field.ReDrawSnake();
+                if(direction != Vector.NotMoving){
+                    Console.SetCursorPosition(0, 0);
+                    Console.WriteLine(View.DisplayMatrix(field.Canvas));
+                }
+            }
+            catch (Exception e)
+            {
                 Console.WriteLine(e.Message);
                 break;
             }
-            Thread.Sleep(100);
+            Thread.Sleep(80);
         }
 
 

@@ -1,3 +1,4 @@
+using System.Text;
 public enum Vector
 {
     Left,
@@ -19,16 +20,69 @@ public class SnakeModel
     public SnakeModel(int size)
     {
         _cellSize = size;
-        _head = new Cell(_cellSize, empty: false);
-        _body = new Cell(_cellSize, empty: false);
-        _tail = new Cell(_cellSize, empty: false);
-        _parts = [_head, _body, _tail];
+        _head = new Head(_cellSize);
+        _body = new Body(_cellSize);
+        _tail = new Tail(_cellSize);
+        _parts = [_tail, _body, _head];
     }
 
-    public void Move()
+    public void Move(Vector direction)
     {
+        _moveDirection = direction;
+    }
+    public Body Eat(Cell food){
+        food.SetSize(0); //to fake eating process
+        Body newPart = new Body(_cellSize);
+        _parts.Insert(1, newPart);
+        return newPart;
+    }
+    public class Head : Cell{
+        public Head(int size) : base(size, empty:false){
+
+        }
+        public override string Render()
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < Height; i++){
+                builder.AppendLine(new string('▓', Width));
+            }
+            
+            return builder.ToString();
+        }
     }
 
+    public class Body : Cell{
+        public Body(int size) : base(size, empty: false){
+
+        }
+        public override string Render()
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < Height; i++)
+            {
+                builder.AppendLine(new string('▒', Width ));
+            }
+
+            return builder.ToString();
+        }
+    }
+
+    public class Tail : Cell{
+        public Tail(int size) : base(size, empty: false){
+
+        }
+        public override string Render()
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < Height; i++)
+            {
+                builder.AppendLine(new string('░', Width));
+            }
+
+            return builder.ToString();
+        }
+
+    }
 
 
 }

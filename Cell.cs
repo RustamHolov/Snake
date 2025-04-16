@@ -1,6 +1,5 @@
-using System.Drawing;
-using System.Runtime.CompilerServices;
 using System.Text;
+
 
 public class Cell : IRenderable
 {

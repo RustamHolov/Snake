@@ -7,45 +7,43 @@ public class Field : IRenderable
     private int _cellSize;
     private int _height;
     private int _width;
-    private string _content = string.Empty;
-    readonly Cell[,] _cells;
-    private Dictionary<(int, int), Cell> _snakePositions = new Dictionary<(int, int), Cell>();
-    readonly char[,] _matrix;
+    readonly Cell[,] _grid;
+    private Dictionary<(int, int), Cell> _snakeLocation = new Dictionary<(int, int), Cell>();
+    readonly char[,] _canvas;
     Dictionary<(int, int), (int, int)> _cellLinsk;
     public int Size { get => _cellSize; }
     public SnakeModel Snake { get => _snake; }
     public Dictionary<(int, int), (int, int)> CellsLinks { get => _cellLinsk; set { _cellLinsk = value; } }
-    public string Content { get => _content; set { _content = value; } }
-    public Cell[,] Cells { get => _cells; }
+    public Cell[,] Grid { get => _grid; }
 
-    public char[,] Matrix { get => _matrix; }
+    public char[,] Canvas { get => _canvas; }
     public int Height { get => _height; }
 
-    public int Width { get => _width * 2; }
+    public int Width { get => _width * 2; } 
     public Field(int height, int width, int cellsSize)
     {
         _cellSize = cellsSize;
         _height = height;
         _width = width;
         _snake = new SnakeModel(Size);
-        _cells = InitialiseCells(height, width);
-        _matrix = new char[Height * Size, Width * Size];
+        _grid = InitialiseGrid(height, width);
+        _canvas = new char[Height * Size, Width * Size];
         _cellLinsk = InitialiseLinks();
         PlaceAll();
-        PlaceSnakeDefault();
+        PlaceSnake();
         SpawnFood();
     }
     public Field(int height, int width) : this(height, width, 1) { }
-    public Field(int cellsSize) : this(5, 5, cellsSize) { }
+    public Field(int cellsSize) : this(10, 10, cellsSize) { }
     public Field() : this(cellsSize: 1) { }
 
 
     public Dictionary<(int, int), (int, int)> InitialiseLinks()
     {
         Dictionary<(int, int), (int, int)> links = [];
-        for (int i = 0; i < _cells.GetLength(0); i++)
+        for (int i = 0; i < _grid.GetLength(0); i++)
         {
-            for (int j = 0; j < _cells.GetLength(1); j++)
+            for (int j = 0; j < _grid.GetLength(1); j++)
             {
                 var cellAdress = (i, j);
                 var matrixAdress = (i * _cellSize, j * _cellSize * 2); //????????????????
@@ -54,7 +52,7 @@ public class Field : IRenderable
         }
         return links;
     }
-    public Cell[,] InitialiseCells(int height, int width)
+    public Cell[,] InitialiseGrid(int height, int width)
     {
         Cell[,] temp = new Cell[height, width];
         for (int i = 0; i < height; i++)
@@ -74,7 +72,7 @@ public class Field : IRenderable
         {
             for (int j = 0; j < Width; j++)
             {
-                s.Append(_cells[i, j].Render());
+                s.Append(_grid[i, j].Render());
             }
             s.Append('\n');
         }
@@ -89,10 +87,10 @@ public class Field : IRenderable
             {
                 for (int j = coordinates.y; j < insert.GetLength(1) + coordinates.y; j++)
                 {
-                    Matrix[i, j] = insert[i - coordinates.x, j - coordinates.y];
+                    Canvas[i, j] = insert[i - coordinates.x, j - coordinates.y];
                 }
             }
-            _cells[position.x, position.y] = element;
+            _grid[position.x, position.y] = element;
         }
         else
         {
@@ -102,81 +100,93 @@ public class Field : IRenderable
     }
     public bool CellIsEmpty((int x, int y) position)
     {
-        return _cells[position.x, position.y].Empty;
+        return _grid[position.x, position.y].Empty;
     }
     public void PlaceAll()
     {
-        for (int i = 0; i < _cells.GetLength(0); i++)
+        for (int i = 0; i < _grid.GetLength(0); i++)
         {
-            for (int j = 0; j < _cells.GetLength(1); j++)
+            for (int j = 0; j < _grid.GetLength(1); j++)
             {
-                Place(_cells[i, j], (i, j));
+                Place(_grid[i, j], (i, j));
             }
         }
     }
     public (int, int) GetRandomPosition()
     {
-        return (new Random().Next(0, _cells.GetLength(0)), new Random().Next(0, _cells.GetLength(1)));
+        return (new Random().Next(0, _grid.GetLength(0)), new Random().Next(0, _grid.GetLength(1)));
     }
-    public void PlaceSnakeDefault()
+    public void PlaceSnake()
     {
-        _snakePositions = new Dictionary<(int, int), Cell>();
         (int x, int y) midPoint = (_height / 2, (_width + Snake.Parts.Count) / 2);
         for (int i = 0; i < Snake.Parts.Count; i++)
         {
             Place(Snake.Parts[i], midPoint);
-            _snakePositions.Add(midPoint, Snake.Parts[i]);
+            _snakeLocation.Add(midPoint, Snake.Parts[i]);
             midPoint.y++;
         }
     }
-    public void MoveSnake(Vector direction)
+    public (int, int) GetNewHeadPosition((int x, int y) currentHead, Vector direction)
     {
-        Dictionary<(int, int), Cell> _newSnakePositions = [];
-        (int x, int y) _tailPosition = _snakePositions.First().Key;
-        (int x, int y) _headPosition = _snakePositions.Last().Key;
-        Cell _headCell = _snakePositions.Last().Value;
-        (int x, int y) _newHeadPosition = direction switch
+        return direction switch
         {
-            Vector.Right => _headPosition.y + 1 < _width ? (_headPosition.x, _headPosition.y + 1) : (_headPosition.x, 0),
-            Vector.Left => _headPosition.y - 1 >= 0 ? (_headPosition.x, _headPosition.y - 1) : (_headPosition.x, _width - 1),
-            Vector.Up => _headPosition.x - 1 >= 0 ? (_headPosition.x - 1, _headPosition.y) : (_height - 1, _headPosition.y),
-            Vector.Down => _headPosition.x + 1 < _height ? (_headPosition.x + 1, _headPosition.y) : (0, _headPosition.y),
-            _ => _headPosition
+            Vector.Right => currentHead.y + 1 < _width ? (currentHead.x, currentHead.y + 1) : (currentHead.x, 0),
+            Vector.Left => currentHead.y - 1 >= 0 ? (currentHead.x, currentHead.y - 1) : (currentHead.x, _width - 1),
+            Vector.Up => currentHead.x - 1 >= 0 ? (currentHead.x - 1, currentHead.y) : (_height - 1, currentHead.y),
+            Vector.Down => currentHead.x + 1 < _height ? (currentHead.x + 1, currentHead.y) : (0, currentHead.y),
+            _ => currentHead
         };
-        bool isFood = !CellIsEmpty(_newHeadPosition);
-        if(_snakePositions.ContainsKey(_newHeadPosition)){
+    }
+    public void ReDrawSnake()
+    {
+        if (Snake.MoveDirection == Vector.NotMoving) return;
+        Dictionary<(int, int), Cell> _newSnakePositions = [];
+        (int x, int y) _tailPosition = _snakeLocation.First().Key;
+        (int x, int y) _headPosition = _snakeLocation.Last().Key;
+        Cell _headCell = _snakeLocation.Last().Value;
+        (int x, int y) _newHeadPosition = GetNewHeadPosition(_headPosition, Snake.MoveDirection);
+        bool isFood = !CellIsEmpty(_newHeadPosition); //check if food
+        if (_snakeLocation.ContainsKey(_newHeadPosition)) //if eat itself
+        {
             throw new Exception("Game Over");
         }
         Place(_headCell, _newHeadPosition);
         _newSnakePositions.Add(_newHeadPosition, _headCell);
-        foreach (((int x, int y) coords, Cell cell) in _snakePositions.Take(_snakePositions.Count - 1).Reverse().ToDictionary())
+        foreach (((int x, int y) coords, Cell snakePart) in _snakeLocation.Take(_snakeLocation.Count - 1).Reverse().ToDictionary())
         {
             var previousPosition = coords;
-            Place(cell, _headPosition);
-            _newSnakePositions.Add(_headPosition, cell);
+            Place(snakePart, _headPosition);
+            _newSnakePositions.Add(_headPosition, snakePart);
             _headPosition = previousPosition;
         }
-        if(isFood){
-            Cell extraPart = new Cell(Size, empty: false);
-            Place(extraPart, _tailPosition);
-            _newSnakePositions.Add(_tailPosition, extraPart);
+        if (isFood)
+        {
+            var food = Grid[_newHeadPosition.x, _newHeadPosition.y];
+            var tail = _newSnakePositions.Last();
+            _newSnakePositions.Remove(tail.Key);
+            Cell extraPart = Snake.Eat(food);
+            Place(extraPart, tail.Key);
+            _newSnakePositions.Add(tail.Key, extraPart);
+            Place(tail.Value, _tailPosition);
+            _newSnakePositions.Add(_tailPosition, tail.Value);
             SpawnFood();
-        }else{
+        }
+        else
+        {
             Place(new Cell(Size), _tailPosition);
         }
-        _snakePositions = _newSnakePositions.Reverse().ToDictionary();
-        Snake.MoveDirection = direction;
+        _snakeLocation = _newSnakePositions.Reverse().ToDictionary();
     }
     public void SpawnFood()
     {
         Cell food = new Food(Size);
-        (int x, int y) spawn;
+        (int x, int y) spawnPosition;
         do
         {
-            spawn = GetRandomPosition();
-        } while (!CellIsEmpty(spawn));
-        _cells[spawn.x, spawn.y] = food;
-        Place(food, spawn);
+            spawnPosition = GetRandomPosition();
+        } while (!CellIsEmpty(spawnPosition));
+        _grid[spawnPosition.x, spawnPosition.y] = food;
+        Place(food, spawnPosition);
     }
 
 }

@@ -11,7 +11,7 @@ public class Food : Cell
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < Height; i++)
         {
-            builder.AppendLine(new string('░', Width));
+            builder.AppendLine(new string('█', Width));
         }
         return builder.ToString();
     }

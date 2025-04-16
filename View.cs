@@ -150,13 +150,13 @@ public class View
         {
             for (int j = 0; j < cols; j++)
             {
-                // In this case, we are dealing with chars, so the max length is 1.
+                // In case chars so max length is 1.
                 maxStringLength = 1;
             }
         }
 
         // Calculate total width of the box
-        int boxWidth = cols * (maxStringLength + 0) + 2; // +2 for the box borders.  No padding between chars.
+        int boxWidth = cols * (maxStringLength + 0) + 2; // +2 for the box borders
 
         StringBuilder result = new StringBuilder();
 
