@@ -1,7 +1,8 @@
 public class Controller{
     private const int _cellSize = 1;
-    private readonly int Rows = Console.WindowWidth / _cellSize - 110 * _cellSize;
-    private readonly int Cols = Console.WindowHeight / _cellSize - 10 * _cellSize;
+
+    private readonly int Height = 20;
+    private readonly int Width = 20;
     private View _view;
     private SnakeModel _snake;
     private Field _field;
@@ -9,12 +10,14 @@ public class Controller{
     public Controller(){
         _view = new View();
         _snake = new SnakeModel(_cellSize);
-        _field = new Field(Cols, Rows,_cellSize, _snake);
+        _field = new Field(Height, Width,_cellSize, _snake);
     }
 
     public void MainFlow(){
         _snake.Subscribe(_field);
         _field.Subscribe(_view);
+        _snake.Events.Subscribe("Eat", _view);
+        _view.DisplaySnakeInfo(_snake);
         _view.DisplayField(_field);
         while(true){
             try{
@@ -22,10 +25,10 @@ public class Controller{
                 {
                     _snake.Turn(Console.ReadKey(true).Key switch
                     {
-                        ConsoleKey.W or ConsoleKey.UpArrow => _snake.MoveDirection == Vector.Down ? Vector.Down : Vector.Up,
-                        ConsoleKey.S or ConsoleKey.DownArrow => _snake.MoveDirection == Vector.Up ? Vector.Up : Vector.Down,
-                        ConsoleKey.A or ConsoleKey.LeftArrow => _snake.MoveDirection == Vector.Right ? Vector.Right : Vector.Left,
-                        ConsoleKey.D or ConsoleKey.RightArrow => _snake.MoveDirection == Vector.Left ? Vector.Left : Vector.Right,
+                        ConsoleKey.W or ConsoleKey.UpArrow =>  Vector.Up,
+                        ConsoleKey.S or ConsoleKey.DownArrow => Vector.Down,
+                        ConsoleKey.A or ConsoleKey.LeftArrow => Vector.Left,
+                        ConsoleKey.D or ConsoleKey.RightArrow =>  Vector.Right,
                         _ => throw new Exception("fail button")
                     });
                 }
@@ -39,5 +42,6 @@ public class Controller{
         }
         _snake.Unscribe(_field);
         _field.Unscribe(_view);
+        _snake.Events.Unscribe("Eat", _view);
     }
 }

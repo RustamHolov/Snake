@@ -69,6 +69,36 @@ public class Field : IRenderable, IObserver, IObservable
         }
         return grid;
     }
+    public void PlaceOnCanvas(Cell element, (int x, int y) position)
+    {
+        if (_cellPixelMap.TryGetValue(position, out (int x, int y) coordinates))
+        {
+            char[,] insert = element.Canvas;
+            for (int i = coordinates.x; i < insert.GetLength(0) + coordinates.x; i++)
+            {
+                for (int j = coordinates.y; j < insert.GetLength(1) + coordinates.y; j++)
+                {
+                    Canvas[i, j] = insert[i - coordinates.x, j - coordinates.y];
+                }
+            }
+            _grid[position.x, position.y] = element;
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException($"Position not found: {position}");
+        }
+        Notify();
+    }
+    public void FillCanvas()
+    {
+        for (int i = 0; i < _grid.GetLength(0); i++)
+        {
+            for (int j = 0; j < _grid.GetLength(1); j++)
+            {
+                PlaceOnCanvas(_grid[i, j], (i, j));
+            }
+        }
+    }
 
     public string Render()
     {
@@ -119,40 +149,12 @@ public class Field : IRenderable, IObserver, IObservable
 
         return result.ToString();
     }
-    public void PlaceOnCanvas(Cell element, (int x, int y) position)
-    {
-        if (_cellPixelMap.TryGetValue(position, out (int x, int y) coordinates))
-        {
-            char[,] insert = element.Canvas;
-            for (int i = coordinates.x; i < insert.GetLength(0) + coordinates.x; i++)
-            {
-                for (int j = coordinates.y; j < insert.GetLength(1) + coordinates.y; j++)
-                {
-                    Canvas[i, j] = insert[i - coordinates.x, j - coordinates.y];
-                }
-            }
-            _grid[position.x, position.y] = element;
-        }
-        else
-        {
-            throw new ArgumentOutOfRangeException($"Position not found: {position}");
-        }
-        Notify();
-    }
+    
     public bool CellIsEmpty((int x, int y) position)
     {
         return _grid[position.x, position.y].Empty;
     }
-    public void FillCanvas()
-    {
-        for (int i = 0; i < _grid.GetLength(0); i++)
-        {
-            for (int j = 0; j < _grid.GetLength(1); j++)
-            {
-                PlaceOnCanvas(_grid[i, j], (i, j));
-            }
-        }
-    }
+    
     public (int, int) GetRandomPosition()
     {
         return (new Random().Next(0, _grid.GetLength(0)), new Random().Next(0, _grid.GetLength(1)));
@@ -191,10 +193,10 @@ public class Field : IRenderable, IObserver, IObservable
         Cell head = _snakeLocation.Last().Key;
         (int x, int y) newHeadCoordinates = GetNewHeadPosition(oldHeadCoordinates, direction);
         bool isFood = !CellIsEmpty(newHeadCoordinates); //check if next cell is food
-        bool isSnake = _snakeLocation.ContainsValue(newHeadCoordinates); // check if next cell is snake itself
-        if (isSnake)
+        bool uroboros = _snakeLocation.ContainsValue(newHeadCoordinates); // check if next cell is snake itself
+        if (uroboros)
         {
-            throw new Exception("Game Over");
+            throw new Exception($"Game Over with score: {_snake.FoodEated}");
         }
         else if(isFood)
         {

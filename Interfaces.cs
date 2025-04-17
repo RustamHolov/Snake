@@ -8,6 +8,9 @@ public interface IRenderable
 public interface IObserver{
     void Update(IObservable publisher);
 }
+public interface ISnakeObserver{
+    void Update(IObservable publisher);
+}
 public interface IObservable{
     void Subscribe(IObserver subscriber);
     void Unscribe(IObserver subscriber);
