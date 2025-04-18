@@ -230,10 +230,6 @@ public class Field : IRenderable, IObserver, IObservable
 
     public void Update(IObservable publisher)
     {
-        if (publisher is SnakeModel Snake)
-        {
-            RedrawSnake(Snake.MoveDirection);
-        }
     }
 
     public void Subscribe(IObserver subscriber)

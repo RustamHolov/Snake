@@ -1,13 +1,6 @@
 using System;
 using System.Text;
-public enum Vector
-{
-    Left,
-    Right,
-    Up,
-    Down,
-    NotMoving
-}
+
 public class SnakeModel : IObservable
 {
     private List<IObserver> _subscribers {get;} = [];
@@ -20,7 +13,7 @@ public class SnakeModel : IObservable
     private Cell _tail;
     private int _foodEated = 0;
     public Vector MoveDirection {get => _moveDirection;}
-    public EventManager Events {get => _events;}
+    public EventManager Events {get => _events; set{ _events = value;}}
     public List<Cell> Parts { get => _parts; set { _parts = value; } }
     public int FoodEated {get => _foodEated;}
     public SnakeModel(int size)
@@ -48,7 +41,7 @@ public class SnakeModel : IObservable
     public void Move()
     {
         if(_moveDirection != Vector.NotMoving){
-            Notify();
+            Notify(Event.Move);
         }
     }
     public void Eat(Cell food, out Body newBodyPart){
@@ -57,7 +50,7 @@ public class SnakeModel : IObservable
         _parts.Insert(1, newPart); //insert new part before tail
         newBodyPart = newPart;
         _foodEated++;
-        Notify("Eat");
+        Notify(Event.Eat);
     }
 
     public void Subscribe(IObserver subscriber)
@@ -76,14 +69,12 @@ public class SnakeModel : IObservable
             subscriber.Update(this);
         }
     }
-    public void Notify(string eventType){
+
+    public void Notify(Event eventType){
         _events.Notify(eventType, this);
     }
-
-    public class Head : Cell{
-        public Head(int size) : base(size, empty:false){
-
-        }
+    #region SnakeParts
+    public class Head(int size) : Cell(size, empty:false){
         public override string Render()
         {
             StringBuilder builder = new StringBuilder();
@@ -95,10 +86,7 @@ public class SnakeModel : IObservable
         }
     }
 
-    public class Body : Cell{
-        public Body(int size) : base(size, empty: false){
-
-        }
+    public class Body(int size) : Cell(size, empty: false){
         public override string Render()
         {
             StringBuilder builder = new StringBuilder();
@@ -111,10 +99,7 @@ public class SnakeModel : IObservable
         }
     }
 
-    public class Tail : Cell{
-        public Tail(int size) : base(size, empty: false){
-
-        }
+    public class Tail(int size) : Cell(size, empty: false){
         public override string Render()
         {
             StringBuilder builder = new StringBuilder();
@@ -127,6 +112,5 @@ public class SnakeModel : IObservable
         }
 
     }
-
-
+    #endregion
 }

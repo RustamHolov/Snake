@@ -8,7 +8,8 @@ class Program
         Console.OutputEncoding = Encoding.UTF8;
         Console.CursorVisible = false;
         Console.Clear();
-        Controller controller = new Controller();
-        controller.MainFlow();
+        View view = new View();
+        Controller controller = new Controller(view);
+        view.Game();
     }
 }
