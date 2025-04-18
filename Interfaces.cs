@@ -8,12 +8,10 @@ public interface IRenderable
 public interface IObserver{
     void Update(IObservable publisher);
 }
-public interface ISnakeObserver{
-    void Update(IObservable publisher);
-}
+
 public interface IObservable{
-    void Subscribe(IObserver subscriber);
-    void Unscribe(IObserver subscriber);
-    void Notify();
+    void Subscribe(Event eventType, IObserver subscriber);
+    void Unscribe(Event eventType, IObserver subscriber);
+    void Notify(Event eventType, IObservable publisher);
 }
 public interface ICommand{}

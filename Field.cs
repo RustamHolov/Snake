@@ -1,7 +1,7 @@
 using System.Reflection.PortableExecutable;
 using System.Text;
 
-public class Field : IRenderable, IObserver, IObservable
+public class Field : IRenderable, IObservable
 {
     
     private int _cellSize;
@@ -12,8 +12,9 @@ public class Field : IRenderable, IObserver, IObservable
     readonly char[,] _canvas;
     Dictionary<(int, int), (int, int)> _cellPixelMap;
     private SnakeModel _snake;
-    private List<IObserver> _subscribers {get;} = [];
+    private EventManager _events;
     private Dictionary<Cell, (int, int)> _snakeLocation = new Dictionary<Cell, (int, int)>();
+    public EventManager Events { get => _events; set { _events = value; } }
     public int Size { get => _cellSize; }
     public int Height { get => _height; }
 
@@ -33,6 +34,7 @@ public class Field : IRenderable, IObserver, IObservable
         _snake = snake;
         _grid = InitialiseGrid(height, width);
         _canvas = new char[Height * Size, Width * Size];
+        _events = new EventManager();
         _cellPixelMap = BuildCellPixelMapping();
         FillCanvas();
         PlaceSnake();
@@ -87,7 +89,7 @@ public class Field : IRenderable, IObserver, IObservable
         {
             throw new ArgumentOutOfRangeException($"Position not found: {position}");
         }
-        Notify();
+        Notify(Event.Place, this);
     }
     public void FillCanvas()
     {
@@ -228,24 +230,18 @@ public class Field : IRenderable, IObserver, IObservable
         _grid[spawnPosition.x, spawnPosition.y] = food;
     }
 
-    public void Update(IObservable publisher)
+    public void Subscribe(Event eventType, IObserver subscriber)
     {
+        _events.Subscribe(eventType, subscriber);
     }
 
-    public void Subscribe(IObserver subscriber)
+    public void Unscribe(Event eventType, IObserver subscriber)
     {
-        _subscribers.Add(subscriber);
+        _events.Unscribe(eventType, subscriber);
     }
 
-    public void Unscribe(IObserver subscriber)
+    public void Notify(Event eventType, IObservable publisher)
     {
-        _subscribers.Remove(subscriber);
-    }
-
-    public void Notify()
-    {
-        foreach(var subscriber in _subscribers){
-            subscriber.Update(this);
-        }
+        _events.Notify(eventType, publisher);
     }
 }

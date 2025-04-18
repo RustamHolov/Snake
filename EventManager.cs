@@ -1,4 +1,4 @@
-public class EventManager
+public class EventManager : IObservable
 {
     private Dictionary<Event, IObserver> listeners;
     public EventManager(){

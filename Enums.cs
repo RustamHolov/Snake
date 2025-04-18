@@ -10,7 +10,8 @@ public enum Event{
     Eat,
     Move,
     NewGame,
-    Size
+    Size,
+    Place
 }
 public enum GameSize{
     Normal = 20,

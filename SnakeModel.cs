@@ -3,7 +3,6 @@ using System.Text;
 
 public class SnakeModel : IObservable
 {
-    private List<IObserver> _subscribers {get;} = [];
     private EventManager _events;
     private readonly int _cellSize;
     private Vector _moveDirection = Vector.NotMoving;
@@ -41,7 +40,7 @@ public class SnakeModel : IObservable
     public void Move()
     {
         if(_moveDirection != Vector.NotMoving){
-            Notify(Event.Move);
+            Notify(Event.Move, this);
         }
     }
     public void Eat(Cell food, out Body newBodyPart){
@@ -50,28 +49,22 @@ public class SnakeModel : IObservable
         _parts.Insert(1, newPart); //insert new part before tail
         newBodyPart = newPart;
         _foodEated++;
-        Notify(Event.Eat);
+        Notify(Event.Eat, this);
     }
 
-    public void Subscribe(IObserver subscriber)
+    public void Subscribe(Event eventType, IObserver subscriber)
     {
-        _subscribers.Add(subscriber);
+        _events.Subscribe(eventType, subscriber);
     }
 
-    public void Unscribe(IObserver subscriber)
+    public void Unscribe(Event eventType, IObserver subscriber)
     {
-        _subscribers.Remove(subscriber);
+        _events.Unscribe(eventType, subscriber);
     }
 
-    public void Notify()
-    {
-        foreach(var subscriber in _subscribers){
-            subscriber.Update(this);
-        }
-    }
 
-    public void Notify(Event eventType){
-        _events.Notify(eventType, this);
+    public void Notify(Event eventType, IObservable publisher){
+        _events.Notify(eventType, publisher);
     }
     #region SnakeParts
     public class Head(int size) : Cell(size, empty:false){

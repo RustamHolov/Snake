@@ -9,23 +9,31 @@ public class Controller{
     private Field _field;
 
     private EatListener _eatListener;
+
     private MoveListener _moveListener;
     private NewGameListener _newGameListener;
     private SetSizeListener _setSizeListener;
+    private PlaceListener _placeListener;
+    private EventManager _events;
 
     public Controller(View view){
         _view = view;
         _snake = new SnakeModel(_cellSize);
         _field = new Field(Height, Width,_cellSize, _snake);
+        _events = new EventManager();
         _eatListener = new EatListener(_view);
         _moveListener = new MoveListener(_field);
         _setSizeListener = new SetSizeListener(this);
         _newGameListener = new NewGameListener(this);
-        _field.Subscribe(_view);
-        _snake.Events.Subscribe(Event.Eat, _eatListener);
-        _snake.Events.Subscribe(Event.Move, _moveListener);
-        _view.Events.Subscribe(Event.NewGame, _newGameListener);
-        _view.Events.Subscribe(Event.Size, _setSizeListener);
+        _placeListener = new PlaceListener(_view);
+        _field.Events = _events;
+        _snake.Events = _events;
+        _view.Events = _events;
+        _field.Subscribe(Event.Place, _placeListener);
+        _snake.Subscribe(Event.Eat, _eatListener);
+        _snake.Subscribe(Event.Move, _moveListener);
+        _view.Subscribe(Event.NewGame, _newGameListener);
+        _view.Subscribe(Event.Size, _setSizeListener);
     }
 
     public void SetGameSize(GameSize size){
@@ -61,10 +69,10 @@ public class Controller{
                 break;
             }
         }
-        _field.Unscribe(_view);
-        _snake.Events.Unscribe(Event.Eat, _eatListener);
-        _snake.Events.Unscribe(Event.Move, _moveListener);
-        _view.Events.Unscribe(Event.NewGame, _newGameListener);
-        _view.Events.Unscribe(Event.Size, _setSizeListener);
+        _field.Unscribe(Event.Place, _placeListener);
+        _snake.Unscribe(Event.Eat, _eatListener);
+        _snake.Unscribe(Event.Move, _moveListener);
+        _view.Unscribe(Event.NewGame, _newGameListener);
+        _view.Unscribe(Event.Size, _setSizeListener);
     }
 }

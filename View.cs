@@ -1,10 +1,9 @@
 using System.Text;
 
 
-public class View : IObserver, IObservable
+public class View : IObservable
 {
     private Dictionary<string, Action> _mainMenu;
-    private List<IObserver> _subscribers;
     private EventManager _events;
     public EventManager Events {get => _events; set { _events = value;}}
 
@@ -17,7 +16,6 @@ public class View : IObserver, IObservable
             {"Settings", Settings},
             {"Exit", Exit}
         };
-        _subscribers = new List<IObserver>();
         _events = new EventManager();
     }
     public void DisplayField(Field field){
@@ -26,7 +24,7 @@ public class View : IObserver, IObservable
     }
     public void NewGame(){
         Console.Clear();
-        Notify(Event.NewGame);
+        Notify(Event.NewGame, this);
     }
     public void Records(){}
     public void Settings(){
@@ -36,12 +34,12 @@ public class View : IObserver, IObservable
         });
     }
     public void SetGameSize(){
-        DisplayMenu(new Dictionary<string, Action>(){
-            {"Normal", () =>  Notify(GameSize.Normal)},
-            {"Medium", () => Notify(GameSize.Medium)},
-            {"Big", () => Notify(GameSize.Big)},
-            {"Back", Settings}
-        });
+        // DisplayMenu(new Dictionary<string, Action>(){
+        //     {"Normal", () =>  Notify(GameSize.Normal)},
+        //     {"Medium", () => Notify(GameSize.Medium)},
+        //     {"Big", () => Notify(GameSize.Big)},
+        //     {"Back", Settings}
+        // });
     }
     public void Exit(){
         Environment.Exit(0);
@@ -90,38 +88,19 @@ public class View : IObserver, IObservable
     public void Game(){
         DisplayMenu(_mainMenu);
     }
-    public void Update(IObservable publisher)
+
+    public void Subscribe(Event eventType, IObserver subscriber)
     {
-        if (publisher is Field field)
-        {
-            DisplayField(field);
-        }
-        else if (publisher is SnakeModel snake)
-        {
-            DisplaySnakeInfo(snake);
-        }
+        _events.Subscribe(eventType, subscriber);
     }
 
-    public void Subscribe(IObserver subscriber)
+    public void Unscribe(Event eventType, IObserver subscriber)
     {
-        _subscribers.Add(subscriber);
+        _events.Unscribe(eventType, subscriber);
     }
 
-    public void Unscribe(IObserver subscriber)
-    {
-        _subscribers.Remove(subscriber);
+    public void Notify(Event eventType, IObservable publisher){
+        _events.Notify(eventType, publisher);
     }
 
-    public void Notify()
-    {
-        foreach(var subscriber in _subscribers){
-            subscriber.Update(this);
-        }
-    }
-    public void Notify(Event eventType){
-        _events.Notify(eventType, this);
-    }
-    public void Notify(GameSize size){
-        _events.Notify(Event.Size, size);
-    }
 }
