@@ -1,38 +1,32 @@
-public class Controller{
+public class Controller
+{
     private View _view;
     private SnakeModel _snake;
     private Field _field;
+    private Input _input;
 
-    private EventManager _events;
-
-    public Controller(View view, SnakeModel snake, Field field, EventManager events){
+    public Controller(View view, SnakeModel snake, Field field, Input input)
+    {
         _view = view;
         _snake = snake;
         _field = field;
-        _events = events;
-        
-        
+        _input = input;
     }
 
-    public void MainFlow(){
+    public void GameLoop()
+    {
         _view.DisplaySnakeInfo(_snake);
         _view.DisplayField(_field);
-        while(true){
-            try{
-                if (Console.KeyAvailable)
-                {
-                    _snake.Turn(Console.ReadKey(true).Key switch
-                    {
-                        ConsoleKey.W or ConsoleKey.UpArrow => Vector.Up,
-                        ConsoleKey.S or ConsoleKey.DownArrow => Vector.Down,
-                        ConsoleKey.A or ConsoleKey.LeftArrow => Vector.Left,
-                        ConsoleKey.D or ConsoleKey.RightArrow => Vector.Right,
-                        _ => Vector.Right
-                    });
-                }
+        while (true)
+        {
+            try
+            {
+                _input.ReadSnakeControll();
                 _snake.Move();
                 Thread.Sleep((int)Speed.Normal);
-            }catch (Exception e){
+            }
+            catch (Exception e)
+            {
                 Console.WriteLine(e.Message);
                 break;
             }

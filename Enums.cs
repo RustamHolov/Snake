@@ -13,7 +13,8 @@ public enum Event{
     Size,
     Place,
     MenuHover,
-    MenuSelect
+    MenuSelect,
+    SnakeTurn
 }
 public enum GameSize{
     Normal = 20,

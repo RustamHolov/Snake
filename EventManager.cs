@@ -22,6 +22,9 @@ public class EventManager : IObservable
             {
                 menuSelectedListener.Update(menu1);
             }
+            if(subscriber is SnakeTurnListener snakeTurnListener && args is Vector vector){
+                snakeTurnListener.Update(vector);
+            }
         }
     }
 

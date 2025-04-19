@@ -1,12 +1,14 @@
+using Snake;
+
 public class NewGameListener : EventListener
 {
-    private Controller _controller;
-    public NewGameListener(Controller controller)
+    private GameDependencies _gameDependencies;
+    public NewGameListener(GameDependencies gameDependencies)
     {
-        _controller = controller;
+        _gameDependencies = gameDependencies;
     }
     public void Update(IObservable publisher)
     {
-        _controller.MainFlow();
+        _gameDependencies.NewGame();
     }
 }

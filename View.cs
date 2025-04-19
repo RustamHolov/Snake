@@ -36,8 +36,9 @@ public class View : IObservable
             {"Back", Start}
         });
         DisplayMenu(settingMenu);
-        while(true){
-            _input.GetMenuOption(settingMenu);
+        while (true)
+        {
+            _input.ReadMenuOption(settingMenu);
         }
     }
     public void SetGameSize()
@@ -53,7 +54,8 @@ public class View : IObservable
     {
         Environment.Exit(0);
     }
-    public void InvokeAction(Menu menu){
+    public void InvokeAction(Menu menu)
+    {
         menu.GetSelectedAction().Invoke();
     }
     public void DisplaySnakeInfo(SnakeModel snake)
@@ -79,13 +81,13 @@ public class View : IObservable
                 Console.WriteLine($"{menu.Options.Keys.ElementAt(i)}");
             }
         }
-
     }
     public void Start()
     {
         DisplayMenu(_mainMenu);
-        while (true){
-            _input.GetMenuOption(_mainMenu);
+        while (true)
+        {
+            _input.ReadMenuOption(_mainMenu);
         }
     }
 
