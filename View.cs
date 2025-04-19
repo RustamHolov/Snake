@@ -3,37 +3,45 @@ using System.Text;
 
 public class View : IObservable
 {
-    private Dictionary<string, Action> _mainMenu;
+    private Menu _mainMenu;
+    private Input _input;
     private EventManager _events;
-    public EventManager Events {get => _events; set { _events = value;}}
+    public EventManager Events { get => _events; set { _events = value; } }
 
-    public View()
+    public View(EventManager events, Input input)
     {
-        _mainMenu = new Dictionary<string, Action>
-        {
-            {"New game", NewGame},
-            {"Records", Records},
-            {"Settings", Settings},
-            {"Exit", Exit}
-        };
-        _events = new EventManager();
+        _mainMenu = new Menu(new Dictionary<string, Action>(){
+            { "New game", NewGame},
+            { "Records", Records},
+            { "Settings", Settings},
+            { "Exit", Exit}});
+        _events = events;
+        _input = input;
     }
-    public void DisplayField(Field field){
+    public void DisplayField(Field field)
+    {
         Console.SetCursorPosition(0, 2);
         Console.WriteLine(field.Render());
     }
-    public void NewGame(){
+    public void NewGame()
+    {
         Console.Clear();
         Notify(Event.NewGame, this);
     }
-    public void Records(){}
-    public void Settings(){
-        DisplayMenu(new Dictionary<string, Action>(){
+    public void Records() { }
+    public void Settings()
+    {
+        Menu settingMenu = new Menu(new Dictionary<string, Action>(){
             {"Game size", SetGameSize},
-            {"Back", Game}
+            {"Back", Start}
         });
+        DisplayMenu(settingMenu);
+        while(true){
+            _input.GetMenuOption(settingMenu);
+        }
     }
-    public void SetGameSize(){
+    public void SetGameSize()
+    {
         // DisplayMenu(new Dictionary<string, Action>(){
         //     {"Normal", () =>  Notify(GameSize.Normal)},
         //     {"Medium", () => Notify(GameSize.Medium)},
@@ -41,65 +49,58 @@ public class View : IObservable
         //     {"Back", Settings}
         // });
     }
-    public void Exit(){
+    public void Exit()
+    {
         Environment.Exit(0);
     }
-    public void DisplaySnakeInfo(SnakeModel snake){
-        Console.SetCursorPosition(0,0);
+    public void InvokeAction(Menu menu){
+        menu.GetSelectedAction().Invoke();
+    }
+    public void DisplaySnakeInfo(SnakeModel snake)
+    {
+        Console.SetCursorPosition(0, 0);
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine($"Score: {snake.FoodEated}");
         Console.ResetColor();
     }
-    public void HoverMenuElement(Dictionary<string, Action> menu, int hoverOption){
+    public void DisplayMenu(Menu menu)
+    {
         Console.Clear();
-        for (int i = 0; i < menu.Keys.Count; i++)
+        for (int i = 0; i < menu.Options.Keys.Count; i++)
         {
-            if(i == hoverOption){
+            if (i == menu.Selected)
+            {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($">{menu.Keys.ElementAt(i)}");
+                Console.WriteLine($">{menu.Options.Keys.ElementAt(i)}");
                 Console.ResetColor();
             }
-            else{
-                Console.WriteLine($"{menu.Keys.ElementAt(i)}");
-            }
-        }
-
-    }
-    public void DisplayMenu(Dictionary<string, Action> menu){
-        int hover = 0;
-        Console.Clear();
-        for(int i = 0; i < menu.Keys.Count; i++){
-            Console.WriteLine($"{menu.Keys.ElementAt(i)}");
-        }
-        HoverMenuElement(menu, hover);
-        while(true){
-            if (Console.KeyAvailable)
+            else
             {
-                 switch(Console.ReadKey(true).Key)
-                {
-                    case ConsoleKey.Enter: menu.TryGetValue(menu.Keys.ElementAt(hover), out Action? action); action?.Invoke(); break;
-                    case ConsoleKey.W or ConsoleKey.UpArrow : HoverMenuElement(menu, hover > 0 ? --hover : hover = menu.Keys.Count - 1 ); break;
-                    case ConsoleKey.S or ConsoleKey.DownArrow : HoverMenuElement(menu, hover < menu.Keys.Count - 1 ? ++hover : hover = 0); break;
-                    default : break;
-                };
+                Console.WriteLine($"{menu.Options.Keys.ElementAt(i)}");
             }
         }
+
     }
-    public void Game(){
+    public void Start()
+    {
         DisplayMenu(_mainMenu);
+        while (true){
+            _input.GetMenuOption(_mainMenu);
+        }
     }
 
-    public void Subscribe(Event eventType, IObserver subscriber)
+    public void Subscribe(Event eventType, EventListener subscriber)
     {
         _events.Subscribe(eventType, subscriber);
     }
 
-    public void Unscribe(Event eventType, IObserver subscriber)
+    public void Unscribe(Event eventType, EventListener subscriber)
     {
         _events.Unscribe(eventType, subscriber);
     }
 
-    public void Notify(Event eventType, IObservable publisher){
+    public void Notify(Event eventType, IObservable publisher)
+    {
         _events.Notify(eventType, publisher);
     }
 

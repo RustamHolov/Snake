@@ -11,21 +11,22 @@ public class SnakeModel : IObservable
     private Cell _body;
     private Cell _tail;
     private int _foodEated = 0;
-    public Vector MoveDirection {get => _moveDirection;}
-    public EventManager Events {get => _events; set{ _events = value;}}
+    public Vector MoveDirection { get => _moveDirection; }
+    public EventManager Events { get => _events; set { _events = value; } }
     public List<Cell> Parts { get => _parts; set { _parts = value; } }
-    public int FoodEated {get => _foodEated;}
-    public SnakeModel(int size)
+    public int FoodEated { get => _foodEated; }
+    public SnakeModel(int size, EventManager events)
     {
         _cellSize = size;
         _head = new Head(_cellSize);
         _body = new Body(_cellSize);
         _tail = new Tail(_cellSize);
         _parts = [_tail, _body, _head];
-        _events = new EventManager();
+        _events = events;
     }
 
-    public void Turn(Vector direction){
+    public void Turn(Vector direction)
+    {
         // Check for opposite directions
         if ((_moveDirection == Vector.Left && direction == Vector.Right) ||
             (_moveDirection == Vector.Right && direction == Vector.Left) ||
@@ -39,11 +40,13 @@ public class SnakeModel : IObservable
     }
     public void Move()
     {
-        if(_moveDirection != Vector.NotMoving){
+        if (_moveDirection != Vector.NotMoving)
+        {
             Notify(Event.Move, this);
         }
     }
-    public void Eat(Cell food, out Body newBodyPart){
+    public void Eat(Cell food, out Body newBodyPart)
+    {
         food.SetSize(0); //to fake eating process
         Body newPart = new Body(_cellSize);
         _parts.Insert(1, newPart); //insert new part before tail
@@ -52,47 +55,52 @@ public class SnakeModel : IObservable
         Notify(Event.Eat, this);
     }
 
-    public void Subscribe(Event eventType, IObserver subscriber)
+    public void Subscribe(Event eventType, EventListener subscriber)
     {
         _events.Subscribe(eventType, subscriber);
     }
 
-    public void Unscribe(Event eventType, IObserver subscriber)
+    public void Unscribe(Event eventType, EventListener subscriber)
     {
         _events.Unscribe(eventType, subscriber);
     }
 
 
-    public void Notify(Event eventType, IObservable publisher){
+    public void Notify(Event eventType, IObservable publisher)
+    {
         _events.Notify(eventType, publisher);
     }
     #region SnakeParts
-    public class Head(int size) : Cell(size, empty:false){
-        public override string Render()
-        {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < Height; i++){
-                builder.AppendLine(new string('▓', Width));
-            }
-            
-            return builder.ToString();
-        }
-    }
-
-    public class Body(int size) : Cell(size, empty: false){
+    public class Head(int size) : Cell(size, empty: false)
+    {
         public override string Render()
         {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < Height; i++)
             {
-                builder.AppendLine(new string('▒', Width ));
+                builder.AppendLine(new string('▓', Width));
             }
 
             return builder.ToString();
         }
     }
 
-    public class Tail(int size) : Cell(size, empty: false){
+    public class Body(int size) : Cell(size, empty: false)
+    {
+        public override string Render()
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < Height; i++)
+            {
+                builder.AppendLine(new string('▒', Width));
+            }
+
+            return builder.ToString();
+        }
+    }
+
+    public class Tail(int size) : Cell(size, empty: false)
+    {
         public override string Render()
         {
             StringBuilder builder = new StringBuilder();

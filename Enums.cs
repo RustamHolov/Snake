@@ -11,7 +11,9 @@ public enum Event{
     Move,
     NewGame,
     Size,
-    Place
+    Place,
+    MenuHover,
+    MenuSelect
 }
 public enum GameSize{
     Normal = 20,

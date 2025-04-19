@@ -1,17 +1,19 @@
 public interface IRenderable
 {
-    int Height {get;}
-    int Width {get;}
-    char[,] Canvas{get;} 
+    int Height { get; }
+    int Width { get; }
+    char[,] Canvas { get; }
     string Render();
 }
-public interface IObserver{
+public interface EventListener
+{
     void Update(IObservable publisher);
 }
 
-public interface IObservable{
-    void Subscribe(Event eventType, IObserver subscriber);
-    void Unscribe(Event eventType, IObserver subscriber);
+public interface IObservable
+{
+    void Subscribe(Event eventType, EventListener subscriber);
+    void Unscribe(Event eventType, EventListener subscriber);
     void Notify(Event eventType, IObservable publisher);
 }
-public interface ICommand{}
+public interface ICommand { }
