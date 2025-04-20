@@ -30,12 +30,13 @@ public class Controller
                 _snake.Move();
                 Thread.Sleep(_settings.Speed);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                
+                GameRuning = false;
+                Console.WriteLine(e.Message);
                 break;
             }
         }
-        _view.DisplayGameOver(_snake.FoodEated);
+        WelcomeMenu();
     }
 }
