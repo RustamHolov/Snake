@@ -5,9 +5,9 @@ public class EatListener : EventListener
     {
         _view = view;
     }
-    public void Update(IObservable publisher)
+    public void Update(object? args)
     {
-        if (publisher is SnakeModel snake)
+        if (args is SnakeModel snake)
         {
             _view.DisplaySnakeInfo(snake);
         }

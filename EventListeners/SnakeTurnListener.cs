@@ -4,12 +4,10 @@ public class SnakeTurnListener : EventListener
     public SnakeTurnListener(SnakeModel snake){
         _snake = snake;
     }
-    public void Update(IObservable publisher)
+    public void Update(object? args)
     {
-    }
-    public void Update(Vector vector){
-        if (_snake.MoveDirection != vector){
-            _snake.Turn(vector);
+        if (args is Vector direction && _snake.MoveDirection != direction){
+            _snake.Turn(direction);
         }
     }
 }

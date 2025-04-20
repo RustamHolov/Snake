@@ -5,11 +5,9 @@ public class MenuSelectedListener : EventListener
         _view = view;
     }
 
-    public void Update(IObservable publisher)
-    {
-    }
-
-    public void Update(Menu menu){
-        _view.InvokeAction(menu);
+    public void Update(object? args){
+        if(args is Menu menu){
+            _view.InvokeAction(menu);
+        }   
     }
 }

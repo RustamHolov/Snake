@@ -7,12 +7,11 @@ public class MenuHoverListener : EventListener
         _view = view;
     }
 
-    public void Update(IObservable publisher)
-    {
-    }
-    public void Update((Menu menu, int hover) args)
-    {
-        args.menu.UpdateSelected(args.hover);
-        _view.DisplayMenu(args.menu);
+    public void Update(object? args)
+    {   
+        if(args is (Menu menu, int hover)){
+            menu.UpdateSelected(hover);
+            _view.DisplayMenu(menu);
+        }
     }
 }

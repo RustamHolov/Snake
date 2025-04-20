@@ -7,7 +7,7 @@ public class NewGameListener : EventListener
     {
         _gameDependencies = gameDependencies;
     }
-    public void Update(IObservable publisher)
+    public void Update(object? args = null)
     {
         _gameDependencies.NewGame();
     }

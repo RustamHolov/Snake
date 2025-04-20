@@ -6,11 +6,11 @@ public class MoveListener : EventListener
         _field = field;
     }
 
-    public void Update(IObservable publisher)
+    public void Update(object? args)
     {
-        if (publisher is SnakeModel Snake)
+        if (args is Vector moveDirection)
         {
-            _field.RedrawSnake(Snake.MoveDirection);
+            _field.RedrawSnake(moveDirection);
         }
     }
 }

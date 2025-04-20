@@ -7,24 +7,24 @@ public class Field : IRenderable, IObservable
     private int _cellSize;
     private int _height;
     private int _width;
-    readonly Cell[,] _grid;
+    private Cell[,] _grid;
 
-    readonly char[,] _canvas;
+    private char[,] _canvas;
     Dictionary<(int, int), (int, int)> _cellPixelMap;
     private SnakeModel _snake;
     private EventManager _events;
     private Dictionary<Cell, (int, int)> _snakeLocation = new Dictionary<Cell, (int, int)>();
     public EventManager Events { get => _events; set { _events = value; } }
-    public int Size { get => _cellSize; }
-    public int Height { get => _height; }
+    public int Size { get => _cellSize; set{ _cellSize = value;}}
+    public int Height { get => _height; set{_height = value;} }
 
-    public int Width { get => _width * 2; }
+    public int Width { get => _width * 2; set {_width = value;} }
 
-    public Cell[,] Grid { get => _grid; }
+    public Cell[,] Grid { get => _grid; private set {_grid = value;}}
 
-    public char[,] Canvas { get => _canvas; }
+    public char[,] Canvas { get => _canvas; private set{ _canvas = value;} }
     public SnakeModel Snake { get => _snake; }
-    public Dictionary<(int, int), (int, int)> CellPixelMap { get => _cellPixelMap; set { _cellPixelMap = value; } }
+    public Dictionary<(int, int), (int, int)> CellPixelMap { get => _cellPixelMap; private set { _cellPixelMap = value; } }
 
     public Field(int height, int width, int cellsSize, SnakeModel snake, EventManager events)
     {
@@ -32,9 +32,10 @@ public class Field : IRenderable, IObservable
         _height = height;
         _width = width;
         _snake = snake;
-        _grid = InitialiseGrid(height, width);
-        _canvas = new char[Height * Size, Width * Size];
         _events = events;
+
+        _grid = InitialiseGrid(_height, _width);
+        _canvas = new char[Height * Size, Width * Size];
         _cellPixelMap = BuildCellPixelMapping();
         FillCanvas();
         PlaceSnake();
@@ -87,6 +88,17 @@ public class Field : IRenderable, IObservable
             throw new ArgumentOutOfRangeException($"Position not found: {position}");
         }
         Notify(Event.Place, this);
+    }
+    public void SetSize(int size){
+        _height = size;
+        _width = size;
+        _grid = InitialiseGrid(_height, _width);
+        _canvas = new char[Height * Size, Width * Size];
+        _snakeLocation.Clear();
+        _cellPixelMap = BuildCellPixelMapping();
+        FillCanvas();
+        PlaceSnake();
+        SpawnFood();
     }
     public void FillCanvas()
     {
@@ -237,8 +249,8 @@ public class Field : IRenderable, IObservable
         _events.Unscribe(eventType, subscriber);
     }
 
-    public void Notify(Event eventType, IObservable publisher)
+    public void Notify(Event eventType, object? args = null)
     {
-        _events.Notify(eventType, publisher);
+        _events.Notify(eventType, args);
     }
 }

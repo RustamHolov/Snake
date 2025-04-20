@@ -15,6 +15,7 @@ public class SnakeModel : IObservable
     public EventManager Events { get => _events; set { _events = value; } }
     public List<Cell> Parts { get => _parts; set { _parts = value; } }
     public int FoodEated { get => _foodEated; }
+    public bool Moved {get; private set;} = false;
     public SnakeModel(int size, EventManager events)
     {
         _cellSize = size;
@@ -42,7 +43,8 @@ public class SnakeModel : IObservable
     {
         if (_moveDirection != Vector.NotMoving)
         {
-            Notify(Event.Move, this);
+            Moved = true;
+            Notify(Event.Move, _moveDirection);
         }
     }
     public void Eat(Cell food, out Body newBodyPart)
@@ -66,9 +68,9 @@ public class SnakeModel : IObservable
     }
 
 
-    public void Notify(Event eventType, IObservable publisher)
+    public void Notify(Event eventType, object? args = null)
     {
-        _events.Notify(eventType, publisher);
+        _events.Notify(eventType, args);
     }
     #region SnakeParts
     public class Head(int size) : Cell(size, empty: false)

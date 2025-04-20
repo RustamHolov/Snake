@@ -9,7 +9,7 @@ class Program
         Console.CursorVisible = false;
         Console.Clear();
         GameDependencies Game = new GameDependencies();
-        Game.View.Start();
+        Game.Controller.WelcomeMenu();
         Game.UnscribeAllListeneres();
     }
 }

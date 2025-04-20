@@ -1,14 +1,15 @@
+using System.Collections.Specialized;
 public class Menu{
     private int _selected;
-    private Dictionary<string, Action> _options;
+    private OrderedDictionary<string,Action> _options;
 
     public int Selected { get => _selected; set{_selected = value;}}
-    public Dictionary<string, Action> Options {get => _options; set {_options = value;}}
+    public OrderedDictionary<string, Action> Options {get => _options; set {_options = value;}}
 
     public Menu(){
-        _options = new Dictionary<string, Action>();
+        _options = new OrderedDictionary<string, Action>();
     }
-    public Menu(Dictionary<string, Action> options){
+    public Menu(OrderedDictionary<string, Action> options){
         _options = options;
     }
 

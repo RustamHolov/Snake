@@ -7,13 +7,13 @@ public interface IRenderable
 }
 public interface EventListener
 {
-    void Update(IObservable publisher);
+    void Update(object? args = null);
 }
 
 public interface IObservable
 {
     void Subscribe(Event eventType, EventListener subscriber);
     void Unscribe(Event eventType, EventListener subscriber);
-    void Notify(Event eventType, IObservable publisher);
+    void Notify(Event eventType, object? args = null);
 }
 public interface ICommand { }

@@ -5,9 +5,9 @@ public class PlaceListener : EventListener
     {
         _view = view;
     }
-    public void Update(IObservable publisher)
+    public void Update(object? args)
     {
-        if (publisher is Field field)
+        if (args is Field field)
         {
             _view.DisplayField(field);
         }

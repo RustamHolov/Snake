@@ -14,21 +14,23 @@ public enum Event{
     Place,
     MenuHover,
     MenuSelect,
-    SnakeTurn
+    SnakeTurn,
+    Pause,
+    Continue
 }
-public enum GameSize{
+public enum GameSizes{
     Normal = 20,
     Medium = 30,
-    Big = 40
+    Big = 35
 }
 
-public enum CellSize{
+public enum PixelSizes{
     Normal = 1, 
     Medium = 2,
     Big = 3
 }
 
-public enum Speed{
+public enum Speeds{
     Slow = 120,
     Normal = 80,
     Moderate = 60,

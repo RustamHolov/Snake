@@ -1,14 +1,14 @@
 public class SetSizeListener : EventListener
 {
-    private Controller _controller;
-    public SetSizeListener(Controller controller)
+    private Field _field;
+    public SetSizeListener(Field field)
     {
-        _controller = controller;
+        _field = field;
     }
-    public void Update(IObservable publisher)
+    public void Update(object? args)
     {
-    }
-    public void Update(GameSize size)
-    {
+       if(args is int size){
+            _field.SetSize(size);
+        }
     }
 }
