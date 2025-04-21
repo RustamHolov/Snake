@@ -1,20 +1,34 @@
 public class Settings : IObservable{
     private EventManager _events;
     private GameState _gameState = GameState.Menu;
+    private int _gameSpeed = (int)Speeds.Moderate;
     public EventManager Events {get => _events;}
+    public bool Edited = false;
     private  int _gameSize = (int)GameSizes.Normal;
+
     public  int GameSize 
     {
         get => _gameSize;
         set {
             if(_gameSize != value){
                 _gameSize = value;
+                Edited = true;
                 Notify(Event.Size, value);
             }
         }
     }
     public int PixelSize{get; set;} = (int)PixelSizes.Normal;
-    public int Speed {get; set;} = (int)Speeds.Normal;
+    public int Speed 
+    {
+        get => _gameSpeed;
+        set
+        {
+            if(_gameSpeed != value){
+                _gameSpeed = value;
+                Edited = true;
+            }
+        }
+    }
 
     public GameState GameState
     {

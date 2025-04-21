@@ -30,6 +30,26 @@ public class Input : IObservable
             
         }
     }
+    public void ReadHorisontalMenuOption(Menu menu){
+        while (true)
+        {
+            if (Console.KeyAvailable)
+            {
+                switch (Console.ReadKey(true).Key)
+                {
+                    case ConsoleKey.Enter:
+                        Notify(Event.MenuSelect, menu);
+                        break;
+                    case ConsoleKey.D or ConsoleKey.RightArrow:
+                        Notify(Event.MenuHover, (menu, 1, true));
+                        continue;
+                    case ConsoleKey.A or ConsoleKey.LeftArrow:
+                        Notify(Event.MenuHover, (menu, -1, true));
+                        continue;
+                }
+            }
+        }
+    }
     public void ReadSnakeControll(){
         ConsoleKey? latestKey = null;
         while (Console.KeyAvailable)

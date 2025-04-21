@@ -92,13 +92,22 @@ public class Field : IRenderable, IObservable
     public void SetSize(int size){
         _height = size;
         _width = size;
+        GetRidOfSnake();
         _grid = InitialiseGrid(_height, _width);
         _canvas = new char[Height * Size, Width * Size];
-        _snakeLocation.Clear();
         _cellPixelMap = BuildCellPixelMapping();
+        
+        try{
+            PlaceSnake();
+        }catch (Exception){
+            _snake = new SnakeModel(Size, _events);
+            PlaceSnake();
+        }
         FillCanvas();
-        PlaceSnake();
         SpawnFood();
+    }
+    public void GetRidOfSnake(){
+        _snakeLocation.Clear();
     }
     public void FillCanvas()
     {

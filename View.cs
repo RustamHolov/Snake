@@ -5,6 +5,7 @@ public class View : IObservable
 {
     private Menu _mainMenu;
     private Menu _settingsMenu;
+    private Menu _gameOverMenu;
     private Settings _settings;
     private Input _input;
     private EventManager _events;
@@ -29,6 +30,12 @@ public class View : IObservable
             {"Back", Start}
         });
 
+        _gameOverMenu = new Menu(new OrderedDictionary<string, Action>(){
+            {"New game", NewGame},
+            {"Main Menu", Start},
+            {"Exit", Exit}
+        });
+
 
     }
     public void DisplayField(Field field)
@@ -42,7 +49,7 @@ public class View : IObservable
         Notify(Event.NewGame);
     }
     public void Continue(){
-        _mainMenu.Options.Remove("Continue");
+        _mainMenu.Remove("Continue");
         Notify(Event.Continue);
     }
     public void OnPause(){
@@ -80,6 +87,7 @@ public class View : IObservable
     }
     public void Exit()
     {
+        
         Console.SetCursorPosition(0, _settings.GameSize + 5);
         Environment.Exit(0);
     }
@@ -94,18 +102,47 @@ public class View : IObservable
         Console.WriteLine($"Score: {snake.FoodEated}");
         Console.ResetColor();
     }
+    public void DisplaRecord(int record){
+        Console.SetCursorPosition(_settings.GameSize*2-10, 0);
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"Record: {record}");
+        Console.ResetColor();
+    }
     public void DisplayGameOver(int score)
     {
         DisplayBackground();
         int windowHeight = 7;
-        int windowWidth = 17;
+        int windowWidth = 30;
         int consoleWidth = _settings.GameSize * 2;
         int consoleHeight = _settings.GameSize;
 
         // Calculate the starting position to center the entire box
         (int boxStartX, int boxStartY) = CalculateCenteredPosition(consoleWidth, consoleHeight, windowWidth, windowHeight);
         string gameOverText = $"  Game Over  \nYour score: {score}";
-        DisplayBoxWithCenteredContent(windowHeight, windowWidth, boxStartX, boxStartY, gameOverText);
+        Console.SetCursorPosition(boxStartX, boxStartY);
+        Console.WriteLine("┌" + new string('─', windowWidth - 2) + "┐"); // Upper line
+
+        for (int i = 1; i < windowHeight - 1; i++)
+        {
+            Console.SetCursorPosition(boxStartX, boxStartY + i);
+            Console.WriteLine("│" + new string(' ', windowWidth - 2) + "│");
+        }
+
+        Console.SetCursorPosition(boxStartX, boxStartY + windowHeight - 1);
+        Console.WriteLine("└" + new string('─', windowWidth - 2) + "┘"); // Lower line
+        string[] lines = gameOverText.Split('\n');
+        int contentHeight = lines.Length;
+
+        int contentStartY = boxStartY + (windowHeight - contentHeight) / 2;
+
+        for (int i = 0; i < contentHeight; i++)
+        {
+            int contentStartX = boxStartX + (windowWidth - lines[i].Length) / 2;
+            Console.SetCursorPosition(contentStartX, contentStartY + i);
+            Console.WriteLine(lines[i]);
+        }
+        DisplayHorisontalMenu(_gameOverMenu);
+        _input.ReadHorisontalMenuOption(_gameOverMenu);
     }
     public (int startX, int startY) CalculateCenteredPosition(int containerWidth, int containerHeight, int contentWidth, int contentHeight)
     {
@@ -113,38 +150,44 @@ public class View : IObservable
         int startY = containerHeight > contentHeight ? (containerHeight - contentHeight) / 2 +2: 0;
         return (startX, startY);
     }
-    public void DisplayBox(int height, int width, int startX, int startY)
-    {
+
+    public void DisplayHorisontalMenu(Menu menu){
+        _settings.GameState = GameState.Menu;
+        var options = menu.Options.Keys.ToList();
+        if (options.Count == 0)
+        {
+            return; // Nothing to display
+        }
+        int totalOptionsLength = menu.Options.Keys.Sum(key => key.Length);
+        
+        int gameHeight = _settings.GameSize;
+        int startY = gameHeight + 5;
+
+        // Calculate horizontal center
+        int gameWidth = _settings.GameSize * 2;
+        int menuWidth = totalOptionsLength + 2; // Add 2 for the "> " or " " prefix
+        int space = Math.Max(1, (gameWidth - totalOptionsLength) / menu.Options.Count);  //in case lack of space
+        int startX = 2;
         Console.SetCursorPosition(startX, startY);
-        Console.WriteLine("┌" + new string('─', width - 2) + "┐"); // Upper line
-
-        for (int i = 1; i < height - 1; i++)
-        {
-            Console.SetCursorPosition(startX, startY + i);
-            Console.WriteLine("│" + new string(' ', width - 2) + "│");
+        for (int i = 0; i < menu.Options.Count; i++){
+            if (i == menu.Selected)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write($">{menu.Options.Keys.ElementAt(i)}");
+                Console.ResetColor();
+                Console.Write(new string(' ', space));
+            }
+            else
+            {
+                Console.Write($" {menu.Options.Keys.ElementAt(i)}");
+                Console.Write(new string(' ', space));
+            }
         }
 
-        Console.SetCursorPosition(startX, startY + height - 1);
-        Console.WriteLine("└" + new string('─', width - 2) + "┘"); // Lower line
-    }
-    public void DisplayBoxWithCenteredContent(int height, int width, int startX, int startY, string content)
-    {
-        DisplayBox(height, width, startX, startY); // Draw the box
-
-        string[] lines = content.Split('\n');
-        int contentHeight = lines.Length;
-
-        int contentStartY = startY + (height - contentHeight) / 2;
-
-        for (int i = 0; i < contentHeight; i++)
-        {
-            int contentStartX = startX + (width - lines[i].Length) / 2;
-            Console.SetCursorPosition(contentStartX, contentStartY + i);
-            Console.WriteLine(lines[i]);
-        }
     }
     public void DisplayMenu(Menu menu)
     {
+        _settings.GameState = GameState.Menu;
         DisplayBackground();
 
         var options = menu.Options.Keys.ToList();

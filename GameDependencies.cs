@@ -1,4 +1,5 @@
 public class GameDependencies{
+    public DataBase DataBase {get; private set;}
     public Settings Settings {get; private set;}
     public EventManager EventManager { get; private set;}
     public View View { get; private set; }
@@ -20,13 +21,14 @@ public class GameDependencies{
     public GameStateListener GameStateListener {get; private set;}
 
     public GameDependencies(){
+        DataBase = new DataBase();
         EventManager = new EventManager();
         Settings = new Settings(EventManager);
         Snake = new SnakeModel(Settings.PixelSize, EventManager);
         Field = new Field(Settings.GameSize, Settings.GameSize, Settings.PixelSize, Snake, EventManager);
         Input = new Input(EventManager);
         View = new View(EventManager, Input, Field, Settings);
-        Controller = new Controller(View, Snake, Field, Input, Settings);
+        Controller = new Controller(View, Snake, Field, Input, Settings, DataBase);
         EatListener = new EatListener(View);
         MoveListener = new MoveListener(Field);
         SetSizeListener = new SetSizeListener(Field);
@@ -62,38 +64,33 @@ public class GameDependencies{
                 Field.Subscribe(Event.GameOver, GameOverListener);
                 break;
             case GameState.Over:
+                Input.Subscribe(Event.MenuHover, MenuHoverListener);
+                Input.Subscribe(Event.MenuSelect, MenuSelectedListener);
                 Settings.Subscribe(Event.State, GameStateListener);
                 break;
         }
     }
     public void NewGame(){
-        if(Snake.Moved){ //in case there was no game before
+        EventManager.ClearAllSubscriptions();
+        Input = new Input(EventManager);
+        Snake = new SnakeModel(Settings.PixelSize, EventManager);
+        Field = new Field(Settings.GameSize, Settings.GameSize, Settings.PixelSize, Snake, EventManager);
+        View = new View(EventManager, Input, Field, Settings);
+        Controller = new Controller(View, Snake, Field, Input, Settings, DataBase);
+        EatListener = new EatListener(View);
+        MoveListener = new MoveListener(Field);
+        SetSizeListener = new SetSizeListener(Field);
+        NewGameListener = new NewGameListener(this);
+        PlaceListener = new PlaceListener(View);
+        MenuHoverListener = new MenuHoverListener(View);
+        MenuSelectedListener = new MenuSelectedListener(View);
+        SnakeTurnListener = new SnakeTurnListener(Snake);
+        PauseListener = new PauseListener(Controller, View);
+        ContinueListener = new ContinueListener(Controller);
+        GameOverListener = new GameOverListener(Controller);
+        GameStateListener = new GameStateListener(this);
 
-            EventManager.ClearAllSubscriptions();
-
-            EventManager = new EventManager();
-            Settings = new Settings(EventManager);
-            Input = new Input(EventManager);
-            Snake = new SnakeModel(Settings.PixelSize, EventManager);
-            Field = new Field(Settings.GameSize, Settings.GameSize, Settings.PixelSize, Snake, EventManager);
-            View = new View(EventManager, Input, Field, Settings);
-            Controller = new Controller(View, Snake, Field, Input, Settings);
-            EatListener = new EatListener(View);
-            MoveListener = new MoveListener(Field);
-            SetSizeListener = new SetSizeListener(Field);
-            NewGameListener = new NewGameListener(this);
-            PlaceListener = new PlaceListener(View);
-            MenuHoverListener = new MenuHoverListener(View);
-            MenuSelectedListener = new MenuSelectedListener(View);
-            SnakeTurnListener = new SnakeTurnListener(Snake);
-            PauseListener = new PauseListener(Controller, View);
-            ContinueListener = new ContinueListener(Controller);
-            GameOverListener = new GameOverListener(Controller);
-            GameStateListener = new GameStateListener(this);
-
-            SubscribeByState();
-        }
-        Settings.GameState = GameState.Game;
+        SubscribeByState();
         Controller.GameLoop();
     }
 }
