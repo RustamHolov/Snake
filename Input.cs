@@ -10,20 +10,24 @@ public class Input : IObservable
 
     public void ReadMenuOption(Menu menu)
     {
-        while (Console.KeyAvailable)
+        while (true)
         {
-            switch (Console.ReadKey(true).Key)
+            if(Console.KeyAvailable)
             {
-                case ConsoleKey.Enter:
-                    Notify(Event.MenuSelect, menu);
-                    break;
-                case ConsoleKey.W or ConsoleKey.UpArrow:
-                    Notify(Event.MenuHover, (menu, -1));
-                    break;
-                case ConsoleKey.S or ConsoleKey.DownArrow:
-                    Notify(Event.MenuHover, (menu, 1));
-                    break;
+                switch (Console.ReadKey(true).Key)
+                {
+                    case ConsoleKey.Enter:
+                        Notify(Event.MenuSelect, menu);
+                        break;
+                    case ConsoleKey.W or ConsoleKey.UpArrow:
+                        Notify(Event.MenuHover, (menu, -1));
+                        continue;
+                    case ConsoleKey.S or ConsoleKey.DownArrow:
+                        Notify(Event.MenuHover, (menu, 1));
+                        continue;
+                }
             }
+            
         }
     }
     public void ReadSnakeControll(){

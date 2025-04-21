@@ -6,6 +6,7 @@ public class ContinueListener : EventListener{
 
     public void Update(object? args = null)
     {
+        _controller.Settings.GameState = GameState.Game;
         _controller.GameRuning = true;
         _controller.GameLoop();
     }

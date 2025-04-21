@@ -10,6 +10,6 @@ class Program
         Console.Clear();
         GameDependencies Game = new GameDependencies();
         Game.Controller.WelcomeMenu();
-        Game.UnscribeAllListeneres();
+        Game.EventManager.ClearAllSubscriptions();
     }
 }

@@ -16,7 +16,9 @@ public enum Event{
     MenuSelect,
     SnakeTurn,
     Pause,
-    Continue
+    Continue,
+    GameOver,
+    State
 }
 public enum GameSizes{
     Normal = 20,
@@ -35,4 +37,10 @@ public enum Speeds{
     Normal = 80,
     Moderate = 60,
     Fast = 40
+}
+
+public enum GameState{
+    Menu,
+    Game,
+    Over
 }

@@ -16,13 +16,15 @@ public class GameDependencies{
     public SnakeTurnListener SnakeTurnListener { get; private set; }
     public PauseListener PauseListener {get; private set;}
     public ContinueListener ContinueListener {get; private set;}
+    public GameOverListener GameOverListener {get; private set;}
+    public GameStateListener GameStateListener {get; private set;}
 
     public GameDependencies(){
         EventManager = new EventManager();
         Settings = new Settings(EventManager);
-        Input = new Input(EventManager);
         Snake = new SnakeModel(Settings.PixelSize, EventManager);
-        Field = new Field (Settings.GameSize, Settings.GameSize, Settings.PixelSize, Snake, EventManager);
+        Field = new Field(Settings.GameSize, Settings.GameSize, Settings.PixelSize, Snake, EventManager);
+        Input = new Input(EventManager);
         View = new View(EventManager, Input, Field, Settings);
         Controller = new Controller(View, Snake, Field, Input, Settings);
         EatListener = new EatListener(View);
@@ -35,39 +37,39 @@ public class GameDependencies{
         SnakeTurnListener = new SnakeTurnListener(Snake);
         PauseListener = new PauseListener(Controller, View);
         ContinueListener = new ContinueListener(Controller);
+        GameOverListener = new GameOverListener(Controller);
+        GameStateListener = new GameStateListener(this);
 
-
-        SubscribeAllListeners();
-        
+        SubscribeByState();        
     }
-    public void SubscribeAllListeners(){
-        Input.Subscribe(Event.MenuHover, MenuHoverListener);
-        Input.Subscribe(Event.MenuSelect, MenuSelectedListener);
-        Input.Subscribe(Event.SnakeTurn, SnakeTurnListener);
-        Input.Subscribe(Event.Pause, PauseListener);
-        Field.Subscribe(Event.Place, PlaceListener);
-        Snake.Subscribe(Event.Eat, EatListener);
-        Snake.Subscribe(Event.Move, MoveListener);
-        View.Subscribe(Event.NewGame, NewGameListener);
-        View.Subscribe(Event.Continue, ContinueListener);
-        Settings.Subscribe(Event.Size, SetSizeListener);
+    public void SubscribeByState(){
+        switch (Settings.GameState){
+            case GameState.Menu:
+                Input.Subscribe(Event.MenuHover, MenuHoverListener);
+                Input.Subscribe(Event.MenuSelect, MenuSelectedListener);
+                View.Subscribe(Event.NewGame, NewGameListener);
+                View.Subscribe(Event.Continue, ContinueListener);
+                Settings.Subscribe(Event.Size, SetSizeListener);
+                Settings.Subscribe(Event.State, GameStateListener);
+                break;
+            case GameState.Game:
+                Input.Subscribe(Event.SnakeTurn, SnakeTurnListener);
+                Input.Subscribe(Event.Pause, PauseListener);
+                Field.Subscribe(Event.Place, PlaceListener);
+                Snake.Subscribe(Event.Eat, EatListener);
+                Snake.Subscribe(Event.Move, MoveListener);
+                Settings.Subscribe(Event.State, GameStateListener);
+                Field.Subscribe(Event.GameOver, GameOverListener);
+                break;
+            case GameState.Over:
+                Settings.Subscribe(Event.State, GameStateListener);
+                break;
+        }
     }
-    public void UnscribeAllListeneres(){
-        Field.Unscribe(Event.Place, PlaceListener);
-        Snake.Unscribe(Event.Eat, EatListener);
-        Snake.Unscribe(Event.Move, MoveListener);
-        View.Unscribe(Event.NewGame, NewGameListener);
-        View.Unscribe(Event.Continue, ContinueListener);
-        Input.Unscribe(Event.MenuHover, MenuHoverListener);
-        Input.Unscribe(Event.MenuSelect, MenuSelectedListener);
-        Input.Unscribe(Event.Pause, PauseListener);
-        Settings.Unscribe(Event.Size, SetSizeListener);
-    }
-
     public void NewGame(){
         if(Snake.Moved){ //in case there was no game before
 
-            UnscribeAllListeneres();
+            EventManager.ClearAllSubscriptions();
 
             EventManager = new EventManager();
             Settings = new Settings(EventManager);
@@ -86,9 +88,12 @@ public class GameDependencies{
             SnakeTurnListener = new SnakeTurnListener(Snake);
             PauseListener = new PauseListener(Controller, View);
             ContinueListener = new ContinueListener(Controller);
+            GameOverListener = new GameOverListener(Controller);
+            GameStateListener = new GameStateListener(this);
 
-            SubscribeAllListeners();
+            SubscribeByState();
         }
+        Settings.GameState = GameState.Game;
         Controller.GameLoop();
     }
 }

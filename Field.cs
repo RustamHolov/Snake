@@ -13,6 +13,7 @@ public class Field : IRenderable, IObservable
     Dictionary<(int, int), (int, int)> _cellPixelMap;
     private SnakeModel _snake;
     private EventManager _events;
+
     private Dictionary<Cell, (int, int)> _snakeLocation = new Dictionary<Cell, (int, int)>();
     public EventManager Events { get => _events; set { _events = value; } }
     public int Size { get => _cellSize; set{ _cellSize = value;}}
@@ -33,7 +34,6 @@ public class Field : IRenderable, IObservable
         _width = width;
         _snake = snake;
         _events = events;
-
         _grid = InitialiseGrid(_height, _width);
         _canvas = new char[Height * Size, Width * Size];
         _cellPixelMap = BuildCellPixelMapping();
@@ -207,7 +207,8 @@ public class Field : IRenderable, IObservable
         bool uroboros = _snakeLocation.ContainsValue(newHeadCoordinates); // check if next cell is snake itself
         if (uroboros)
         {
-            throw new Exception($"Game Over with score: {_snake.FoodEated}");
+            Notify(Event.GameOver);
+            return;
         }
         else if (isFood)
         {

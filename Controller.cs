@@ -5,6 +5,7 @@ public class Controller
     private SnakeModel _snake;
     private Field _field;
     private Input _input;
+    public Settings Settings {get => _settings;}
     public bool GameRuning {get; set;} = true;
     public Controller(View view, SnakeModel snake, Field field, Input input, Settings settings)
     {
@@ -23,20 +24,12 @@ public class Controller
         _view.DisplayField(_field);
         while (GameRuning)
         {
-            try
-            {
-                
-                _input.ReadSnakeControll();
-                _snake.Move();
-                Thread.Sleep(_settings.Speed);
-            }
-            catch (Exception e)
-            {
-                GameRuning = false;
-                Console.WriteLine(e.Message);
-                break;
-            }
+            _input.ReadSnakeControll();
+            _snake.Move();
+            Thread.Sleep(_settings.Speed);
         }
-        WelcomeMenu();
+    }
+    public void GameOver(){
+        _view.DisplayGameOver(_snake.FoodEated);
     }
 }

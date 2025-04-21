@@ -23,12 +23,13 @@ public class View : IObservable
             { "Records", Records},
             { "Settings", EditSettings},
             { "Exit", Exit}});
-
         _settingsMenu = new Menu(new OrderedDictionary<string, Action>(){
             {"Game size", SetGameSize},
             {"Speed", SetSpeed},
             {"Back", Start}
         });
+
+
     }
     public void DisplayField(Field field)
     {
@@ -41,46 +42,41 @@ public class View : IObservable
         Notify(Event.NewGame);
     }
     public void Continue(){
+        _mainMenu.Options.Remove("Continue");
         Notify(Event.Continue);
     }
     public void OnPause(){
-        var extendetMainMenu = _mainMenu;
-        extendetMainMenu.Options.Insert(0, "Continue", Continue);
-        DisplayMenu(extendetMainMenu);
+        _mainMenu.Options.Insert(0, "Continue", Continue);
+        DisplayMenu(_mainMenu);
+        _input.ReadMenuOption(_mainMenu);
     }
     public void Records() { }
     public void EditSettings()
     {
         DisplayMenu(_settingsMenu);
-        while (true)
-        {
-            _input.ReadMenuOption(_settingsMenu);
-        }
+         _input.ReadMenuOption(_settingsMenu);
     }
     public void SetGameSize()
     {
         var _gameSizeMenu = new Menu(new OrderedDictionary<string, Action>{
-            {"Normal", () => {_settings.GameSize = (int)GameSizes.Normal; EditSettings();}},
-            {"Medium", () => {_settings.GameSize = (int)GameSizes.Medium; EditSettings();}},
-            {"Big", () => {_settings.GameSize = (int)GameSizes.Big; EditSettings();}},
+            {"NORMAL", () => {_settings.GameSize = (int)GameSizes.Normal; EditSettings();}},
+            {"MEDIUM", () => {_settings.GameSize = (int)GameSizes.Medium; EditSettings();}},
+            {"BIG", () => {_settings.GameSize = (int)GameSizes.Big; EditSettings();}},
+            {"Back", EditSettings},
         });
         DisplayMenu(_gameSizeMenu);
-        while (true){
-            _input.ReadMenuOption(_gameSizeMenu);
-        }
+        _input.ReadMenuOption(_gameSizeMenu);
     }
     public void SetSpeed(){
         var _gameSpeedMenu = new Menu(new OrderedDictionary<string, Action>{
-            {"Slow", () => {_settings.Speed = (int)Speeds.Slow; EditSettings();}},
-            {"Normal", () => {_settings.Speed = (int)Speeds.Normal; EditSettings();}},
-            {"Moderate", () => {_settings.Speed = (int)Speeds.Moderate; EditSettings();}},
-            {"Fast", () => {_settings.Speed = (int)Speeds.Fast; EditSettings();}},
+            {"SLOW", () => {_settings.Speed = (int)Speeds.Slow; EditSettings();}},
+            {"NORMAL", () => {_settings.Speed = (int)Speeds.Normal; EditSettings();}},
+            {"MODERATE", () => {_settings.Speed = (int)Speeds.Moderate; EditSettings();}},
+            {"FAST", () => {_settings.Speed = (int)Speeds.Fast; EditSettings();}},
+            {"Back", EditSettings},
         });
         DisplayMenu(_gameSpeedMenu);
-        while (true)
-        {
-            _input.ReadMenuOption(_gameSpeedMenu);
-        }
+        _input.ReadMenuOption(_gameSpeedMenu);
     }
     public void Exit()
     {
@@ -98,46 +94,54 @@ public class View : IObservable
         Console.WriteLine($"Score: {snake.FoodEated}");
         Console.ResetColor();
     }
-    public void DisplayGameOver(int score){
+    public void DisplayGameOver(int score)
+    {
         DisplayBackground();
-        int windowHeight = 5; // Increased height to accommodate "Game Over" and score
-        int windowWidth = 15; // Increased width for better readability
+        int windowHeight = 7;
+        int windowWidth = 17;
         int consoleWidth = _settings.GameSize * 2;
         int consoleHeight = _settings.GameSize;
 
         // Calculate the starting position to center the entire box
-        int startX = Math.Max(0, (consoleWidth - windowWidth) / 2);
-        int startY = Math.Max(0, (consoleHeight - windowHeight/2) / 2);
-
-        // Draw the box
+        (int boxStartX, int boxStartY) = CalculateCenteredPosition(consoleWidth, consoleHeight, windowWidth, windowHeight);
+        string gameOverText = $"  Game Over  \nYour score: {score}";
+        DisplayBoxWithCenteredContent(windowHeight, windowWidth, boxStartX, boxStartY, gameOverText);
+    }
+    public (int startX, int startY) CalculateCenteredPosition(int containerWidth, int containerHeight, int contentWidth, int contentHeight)
+    {
+        int startX = containerWidth > contentWidth ? (containerWidth - contentWidth) / 2 +1: 0;
+        int startY = containerHeight > contentHeight ? (containerHeight - contentHeight) / 2 +2: 0;
+        return (startX, startY);
+    }
+    public void DisplayBox(int height, int width, int startX, int startY)
+    {
         Console.SetCursorPosition(startX, startY);
-        Console.WriteLine("┌" + new string('─', windowWidth - 2) + "┐"); // Upper line
+        Console.WriteLine("┌" + new string('─', width - 2) + "┐"); // Upper line
 
-        // Draw the middle lines
-        for (int i = 1; i < windowHeight - 1; i++)
+        for (int i = 1; i < height - 1; i++)
         {
             Console.SetCursorPosition(startX, startY + i);
-            Console.WriteLine("│" + new string(' ', windowWidth - 2) + "│");
+            Console.WriteLine("│" + new string(' ', width - 2) + "│");
         }
 
-        Console.SetCursorPosition(startX, startY + windowHeight - 1);
-        Console.WriteLine("└" + new string('─', windowWidth - 2) + "┘"); // Lower line
+        Console.SetCursorPosition(startX, startY + height - 1);
+        Console.WriteLine("└" + new string('─', width - 2) + "┘"); // Lower line
+    }
+    public void DisplayBoxWithCenteredContent(int height, int width, int startX, int startY, string content)
+    {
+        DisplayBox(height, width, startX, startY); // Draw the box
 
-        // Calculate the position to center the "Game Over" text
-        string gameOverText = "Game Over";
-        int gameOverTextX = startX + (windowWidth - gameOverText.Length) / 2;
-        int gameOverTextY = startY + 1; // Position it one row below the top
+        string[] lines = content.Split('\n');
+        int contentHeight = lines.Length;
 
-        Console.SetCursorPosition(gameOverTextX, gameOverTextY);
-        Console.WriteLine(gameOverText);
+        int contentStartY = startY + (height - contentHeight) / 2;
 
-        // Calculate the position to center the score
-        string scoreText = $"Score: {score}";
-        int scoreTextX = startX + (windowWidth - scoreText.Length) / 2;
-        int scoreTextY = startY + 3; // Position it one row below "Game Over"
-
-        Console.SetCursorPosition(scoreTextX, scoreTextY);
-        Console.WriteLine(scoreText);
+        for (int i = 0; i < contentHeight; i++)
+        {
+            int contentStartX = startX + (width - lines[i].Length) / 2;
+            Console.SetCursorPosition(contentStartX, contentStartY + i);
+            Console.WriteLine(lines[i]);
+        }
     }
     public void DisplayMenu(Menu menu)
     {
@@ -185,10 +189,7 @@ public class View : IObservable
     public void Start()
     {
         DisplayMenu(_mainMenu);
-        while (true)
-        {
-            _input.ReadMenuOption(_mainMenu);
-        }
+        _input.ReadMenuOption(_mainMenu);
     }
 
     public void Subscribe(Event eventType, EventListener subscriber)

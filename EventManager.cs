@@ -1,27 +1,38 @@
 public class EventManager 
 {
-    private Dictionary<Event, EventListener> listeners;
+    private Dictionary<Event, List<EventListener>> _listeners;
     public EventManager()
     {
-        listeners = new Dictionary<Event, EventListener>();
+        _listeners = new Dictionary<Event, List<EventListener>>();
     }
 
     public void Notify(Event eventType, object? args = null){
-        if (listeners.TryGetValue(eventType, out EventListener? subscriber) && subscriber != null){
-            if(args != null){
-                subscriber.Update(args);
-            }else{
-                subscriber.Update();
+        if (_listeners.ContainsKey(eventType))
+        {
+            foreach (var listener in _listeners[eventType])
+            {
+                listener.Update(args);
             }
         }
     }
     public void Subscribe(Event eventType, EventListener subscriber)
     {
-        listeners.Add(eventType, subscriber);
+        if (!_listeners.ContainsKey(eventType))
+        {
+            _listeners[eventType] = new List<EventListener>();
+        }
+        _listeners[eventType].Add(subscriber);
     }
 
     public void Unscribe(Event eventType, EventListener subscriber)
     {
-        listeners.Remove(eventType);
+        if (_listeners.ContainsKey(eventType))
+        {
+            _listeners[eventType].Remove(subscriber);
+        }
+    }
+    public void ClearAllSubscriptions()
+    {
+        _listeners.Clear();
     }
 }
