@@ -8,8 +8,8 @@ public class Controller
     private Field _field;
     private Input _input;
     private DataBase _db;
-    public Settings Settings {get => _settings;}
-    public bool GameRuning {get; set;} = true;
+    public Settings Settings { get => _settings; }
+    public bool GameRuning { get; set; } = true;
     public Controller(View view, SnakeModel snake, Field field, Input input, Settings settings, DataBase dataBase)
     {
         _view = view;
@@ -19,7 +19,8 @@ public class Controller
         _settings = settings;
         _db = dataBase;
     }
-    public void WelcomeMenu(){
+    public void WelcomeMenu()
+    {
         _view.Start();
     }
     public void GameLoop()
@@ -36,24 +37,30 @@ public class Controller
             Thread.Sleep(_settings.Speed);
         }
     }
-    public void GameOver(){
+    public void GameOver()
+    {
         _field.GetRidOfSnake();
         _view.DisplayGameOver(_snake.FoodEated);
     }
-    public void SaveRecord(){
+    public void SaveRecord()
+    {
         string name = _view.DisplaySaveWindow(_snake.FoodEated);
         _db.AddRecord(name, _snake.FoodEated);
-        if(_db.SaveToCSV()){
+        if (_db.SaveToCSV())
+        {
             _view.DisplayBoxWithCenteredMessage("Saved successfully!");
-        }else{
+        }
+        else
+        {
             _view.DisplayBoxWithCenteredMessage("Fail saving...");
         }
     }
-    public (string Name, int HighestValue) CalculateBestScore(){
+    public (string Name, int HighestValue) CalculateBestScore()
+    {
         var records = _db.Records;
         if (records == null || !records.Any())
         {
-            return ("", int.MinValue); 
+            return ("", int.MinValue);
         }
 
         string? keyWithMax = null;
@@ -72,7 +79,8 @@ public class Controller
         }
         return (keyWithMax ?? string.Empty, maxRecord);
     }
-    public void LeaderBoard(){
+    public void Leaderboard()
+    {
         var records = _db.Records;
 
         if (records == null || !records.Any())

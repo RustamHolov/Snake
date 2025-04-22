@@ -7,6 +7,6 @@ public class RatingListener : EventListener
     }
     public void Update(object? args = null)
     {
-        _controller.LeaderBoard();
+        _controller.Leaderboard();
     }
 }

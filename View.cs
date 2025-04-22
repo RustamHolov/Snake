@@ -69,37 +69,53 @@ public class View : IObservable
         Notify(Event.Rating);
     }
 
-    public void DisplayRecords(List<KeyValuePair<string, int>> leaderBoard)
+    public void DisplayRecords(List<KeyValuePair<string, int>> leaderboard)
     {
-        Menu backMenu = new Menu(new OrderedDictionary<string, Action>(){
-            {"Back", Start},
-        });
+        var backMenu = new Menu(new OrderedDictionary<string, Action>
+    {
+        { "Back", Start },
+    });
+
         DisplayBackground();
+
         string title = "♔ Leaderboard ♔";
         int gameHeight = _settings.GameSize;
         int gameWidth = _settings.GameSize * 2;
-        int startX = 0;
-        int startY = 3;
-        int titleX = startX + (gameWidth - title.Length) / 2;
-        Console.SetCursorPosition(titleX, startY);
+
+        // Title display
+        int titleY = 3;
+        int titleX = (gameWidth - title.Length) / 2;
+        Console.SetCursorPosition(titleX, titleY);
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write(title);
-        startY += 1; //spacing title
+        Console.WriteLine(title);
         Console.ResetColor();
-        int recordsX = startX + 4; //padding left
-        int maxEntryWidth = gameWidth - 6; //both sides padding
-        for (int i = 0; i < leaderBoard.Count; i++)
+
+        // Start displaying records below title
+        int recordsStartY = titleY + 2;
+        int paddingX = 4;
+        int maxWidth = gameWidth - (paddingX * 2);
+
+        int maxNameLength = leaderboard.Max(e => e.Key.Length);
+        int maxScoreLength = leaderboard.Max(e => e.Value.ToString().Length);
+        int rankWidth = leaderboard.Count.ToString().Length + 1; // e.g., "10." is 3 chars
+
+        for (int i = 0; i < leaderboard.Count; i++)
         {
-            Console.SetCursorPosition(recordsX, startY + i);
-            string line = $"{i + 1}.{leaderBoard.ElementAt(i).Key}";
-            int filling = maxEntryWidth - line.Length - $"{leaderBoard.ElementAt(i).Value}".Length;
-            line += new string('.', filling);
-            line += leaderBoard.ElementAt(i).Value;
-            Console.Write(line);
+            var entry = leaderboard[i];
+            string rank = $"{i + 1}.";
+            string name = entry.Key;
+            string score = entry.Value.ToString();
+
+            string line = rank.PadRight(rankWidth) + name;
+            int dotsNeeded = Math.Max(1, maxWidth - line.Length - score.Length);
+            line += new string('.', dotsNeeded) + score;
+
+            Console.SetCursorPosition(paddingX, recordsStartY + i);
+            Console.WriteLine(line);
         }
+
         DisplayHorizontalMenu(backMenu);
         _input.ReadHorisontalMenuOption(backMenu);
-
     }
     public void EditSettings()
     {
