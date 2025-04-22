@@ -16,4 +16,3 @@ public interface IObservable
     void Unscribe(Event eventType, EventListener subscriber);
     void Notify(Event eventType, object? args = null);
 }
-public interface ICommand { }

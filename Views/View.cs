@@ -126,6 +126,7 @@ public class View : IObservable
     {
         void SetGameSize(GameSizes size)
         {
+            if(_mainMenu.Options.TryGetValue("Continue", out _)) _mainMenu.Remove("Continue"); //changing size unable continue 
             _settings.GameSize = (int)size;
             SetSize(); // to redraw
         }
@@ -138,9 +139,10 @@ public class View : IObservable
             {GetLabel(GameSizes.Big),    () => SetGameSize(GameSizes.Big)},
             {"Back",                      EditSettings},
         });
-
+        
         DisplayMenu(_gameSizeMenu);
         _input.ReadMenuOption(_gameSizeMenu);
+        
     }
     public void SetSpeed()
     {

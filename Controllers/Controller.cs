@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 
 public class Controller
 {
@@ -33,11 +33,22 @@ public class Controller
         var (Name, HighestValue) = CalculateBestScore();
         _view.DisplaRecord(Name, HighestValue);
         _view.DisplayField(_field);
+        Stopwatch stopwatch = new Stopwatch();
+        long lastUpdate = 0;
+        int moveInterval = _settings.Speed; // milliseconds between moves
+
+        stopwatch.Start();
         while (GameRuning)
         {
+            long elapsed = stopwatch.ElapsedMilliseconds;
             _input.ReadSnakeControll();
-            _snake.Move();
-            Thread.Sleep(_settings.Speed);
+            // Only move the snake when enough time has passed
+            if (elapsed - lastUpdate >= moveInterval)
+            {
+                _snake.Move();
+                lastUpdate = elapsed;
+            }
+            Thread.Sleep(1);
         }
     }
     public void GameOver()

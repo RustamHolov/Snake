@@ -1,31 +1,34 @@
-public class Settings : IObservable{
+public class Settings : IObservable
+{
     private EventManager _events;
     private GameState _gameState = GameState.Menu;
     private int _gameSpeed = (int)Speeds.Moderate;
-    public EventManager Events {get => _events;}
-    public bool Edited = false;
-    private  int _gameSize = (int)GameSizes.Normal;
+    public EventManager Events { get => _events; }
+    public bool SizeEdited = false;
+    private int _gameSize = (int)GameSizes.Normal;
 
-    public  int GameSize 
+    public int GameSize
     {
         get => _gameSize;
-        set {
-            if(_gameSize != value){
+        set
+        {
+            if (_gameSize != value)
+            {
                 _gameSize = value;
-                Edited = true;
+                SizeEdited = true;
                 Notify(Event.Size, value);
             }
         }
     }
-    public int PixelSize{get; set;} = (int)PixelSizes.Normal;
-    public int Speed 
+    public int PixelSize { get; set; } = (int)PixelSizes.Normal;
+    public int Speed
     {
         get => _gameSpeed;
         set
         {
-            if(_gameSpeed != value){
+            if (_gameSpeed != value)
+            {
                 _gameSpeed = value;
-                Edited = true;
             }
         }
     }
@@ -33,14 +36,17 @@ public class Settings : IObservable{
     public GameState GameState
     {
         get => _gameState;
-        set {
-            if(_gameState != value){
+        set
+        {
+            if (_gameState != value)
+            {
                 _gameState = value;
                 Notify(Event.State);
             }
         }
     }
-    public Settings(EventManager eventManager){
+    public Settings(EventManager eventManager)
+    {
         _events = eventManager;
     }
     public void Notify(Event eventType, object? args = null)
@@ -57,4 +63,4 @@ public class Settings : IObservable{
     {
         _events.Unscribe(eventType, subscriber);
     }
-} 
+}

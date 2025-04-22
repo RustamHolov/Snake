@@ -1,4 +1,3 @@
-using System.Reflection.PortableExecutable;
 using System.Text;
 
 public class Field : IRenderable, IObservable
@@ -96,15 +95,7 @@ public class Field : IRenderable, IObservable
         _grid = InitialiseGrid(_height, _width);
         _canvas = new char[Height * Size, Width * Size];
         _cellPixelMap = BuildCellPixelMapping();
-        
-        try{
-            PlaceSnake();
-        }catch (Exception){
-            _snake = new SnakeModel(Size, _events);
-            PlaceSnake();
-        }
         FillCanvas();
-        SpawnFood();
     }
     public void GetRidOfSnake(){
         _snakeLocation.Clear();
@@ -229,11 +220,13 @@ public class Field : IRenderable, IObservable
             SpawnFood();
         }
         replaceSnakePart(head, newHeadCoordinates);
-        foreach ((Cell snakePart, (int x, int y) coordinates) in _snakeLocation.Take(_snakeLocation.Count - 1).Reverse().ToDictionary())
+        var keys = _snakeLocation.Keys.ToList();
+        for (int i = keys.Count - 2; i >= 0; i--)
         {
-            var previousCoordinates = coordinates;
-            replaceSnakePart(snakePart, oldHeadCoordinates);
-            oldHeadCoordinates = previousCoordinates;
+            var part = keys[i];
+            var prev = _snakeLocation[part];
+            replaceSnakePart(part, oldHeadCoordinates);
+            oldHeadCoordinates = prev;
         }
         PlaceOnCanvas(new Cell(Size), oldTailCoordinates);
     }

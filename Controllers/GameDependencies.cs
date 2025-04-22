@@ -22,7 +22,7 @@ public class GameDependencies
     public GameStateListener GameStateListener { get; private set; } = null!;
     public SaveListener SaveListener { get; private set; } = null!;
     public RatingListener RatingListener { get; private set; } = null!;
-    
+
 
     public GameDependencies()
     {
@@ -35,7 +35,7 @@ public class GameDependencies
     }
     public void NewGame()
     {
-        if (!Controller.FirstRun)
+        if (!Controller.FirstRun || Settings.SizeEdited)
         {
             EventManager.ClearAllSubscriptions();
             InitializeGame();
