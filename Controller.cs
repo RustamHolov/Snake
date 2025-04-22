@@ -72,4 +72,24 @@ public class Controller
         }
         return (keyWithMax ?? string.Empty, maxRecord);
     }
+    public void LeaderBoard(){
+        var records = _db.Records;
+
+        if (records == null || !records.Any())
+            throw new Exception("No records provided");
+
+        var leaderboard = new List<KeyValuePair<string, int>>();
+
+        foreach (var pair in records)
+        {
+            foreach (int score in pair.Value)
+            {
+                leaderboard.Add(new KeyValuePair<string, int>(pair.Key, score));
+            }
+        }
+
+        var sorted = leaderboard.OrderByDescending(entry => entry.Value).ToList();
+
+        _view.DisplayRecords(sorted);
+    }
 }

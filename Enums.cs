@@ -6,7 +6,8 @@ public enum Vector
     Down,
     NotMoving
 }
-public enum Event{
+public enum Event
+{
     Eat,
     Move,
     NewGame,
@@ -19,28 +20,33 @@ public enum Event{
     Continue,
     GameOver,
     State,
-    Save
+    Save,
+    Rating
 }
-public enum GameSizes{
+public enum GameSizes
+{
     Normal = 20,
     Medium = 30,
     Big = 35
 }
 
-public enum PixelSizes{
-    Normal = 1, 
+public enum PixelSizes
+{
+    Normal = 1,
     Medium = 2,
     Big = 3
 }
 
-public enum Speeds{
+public enum Speeds
+{
     Slow = 120,
     Normal = 80,
     Moderate = 60,
     Fast = 40
 }
 
-public enum GameState{
+public enum GameState
+{
     Menu,
     Game,
     Over

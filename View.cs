@@ -21,11 +21,11 @@ public class View : IObservable
 
         _mainMenu = new Menu(new OrderedDictionary<string, Action>(){
             { "New game", NewGame},
-            { "Records", Records},
+            { "Rating", Rating},
             { "Settings", EditSettings},
             { "Exit", Exit}});
         _settingsMenu = new Menu(new OrderedDictionary<string, Action>(){
-            {"Game size", SetGameSize},
+            {"Game size", SetSize},
             {"Speed", SetSpeed},
             {"Back", Start}
         });
@@ -44,7 +44,8 @@ public class View : IObservable
         Console.SetCursorPosition(0, 2);
         Console.WriteLine(field.Render());
     }
-    public void Save() { 
+    public void Save()
+    {
         Notify(Event.Save);
     }
     public void NewGame()
@@ -63,39 +64,94 @@ public class View : IObservable
         DisplayMenu(_mainMenu);
         _input.ReadMenuOption(_mainMenu);
     }
-    public void Records() { }
+    public void Rating()
+    {
+        Notify(Event.Rating);
+    }
+
+    public void DisplayRecords(List<KeyValuePair<string, int>> leaderBoard)
+    {
+        Menu backMenu = new Menu(new OrderedDictionary<string, Action>(){
+            {"Back", Start},
+        });
+        DisplayBackground();
+        string title = "♔ Leaderboard ♔";
+        int gameHeight = _settings.GameSize;
+        int gameWidth = _settings.GameSize * 2;
+        int startX = 0;
+        int startY = 3;
+        int titleX = startX + (gameWidth - title.Length) / 2;
+        Console.SetCursorPosition(titleX, startY);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.Write(title);
+        startY += 1; //spacing title
+        Console.ResetColor();
+        int recordsX = startX + 4; //padding left
+        int maxEntryWidth = gameWidth - 6; //both sides padding
+        for (int i = 0; i < leaderBoard.Count; i++)
+        {
+            Console.SetCursorPosition(recordsX, startY + i);
+            string line = $"{i + 1}.{leaderBoard.ElementAt(i).Key}";
+            int filling = maxEntryWidth - line.Length - $"{leaderBoard.ElementAt(i).Value}".Length;
+            line += new string('.', filling);
+            line += leaderBoard.ElementAt(i).Value;
+            Console.Write(line);
+        }
+        DisplayHorizontalMenu(backMenu);
+        _input.ReadHorisontalMenuOption(backMenu);
+
+    }
     public void EditSettings()
     {
         DisplayMenu(_settingsMenu);
         _input.ReadMenuOption(_settingsMenu);
     }
-    public void SetGameSize()
+    public void SetSize()
     {
+        void SetGameSize(GameSizes size)
+        {
+            _settings.GameSize = (int)size;
+            SetSize(); // to redraw
+        }
+        string GetLabel(GameSizes size) =>
+            _settings.GameSize == (int)size ? $"▸ {size}" : size.ToString();
+
         var _gameSizeMenu = new Menu(new OrderedDictionary<string, Action>{
-            {"NORMAL", () => {_settings.GameSize = (int)GameSizes.Normal; EditSettings();}},
-            {"MEDIUM", () => {_settings.GameSize = (int)GameSizes.Medium; EditSettings();}},
-            {"BIG", () => {_settings.GameSize = (int)GameSizes.Big; EditSettings();}},
-            {"Back", EditSettings},
+            {GetLabel(GameSizes.Normal), () => SetGameSize(GameSizes.Normal)},
+            {GetLabel(GameSizes.Medium), () => SetGameSize(GameSizes.Medium)},
+            {GetLabel(GameSizes.Big),    () => SetGameSize(GameSizes.Big)},
+            {"Back",                      EditSettings},
         });
+
         DisplayMenu(_gameSizeMenu);
         _input.ReadMenuOption(_gameSizeMenu);
     }
     public void SetSpeed()
     {
-        var _gameSpeedMenu = new Menu(new OrderedDictionary<string, Action>{
-            {"SLOW", () => {_settings.Speed = (int)Speeds.Slow; EditSettings();}},
-            {"NORMAL", () => {_settings.Speed = (int)Speeds.Normal; EditSettings();}},
-            {"MODERATE", () => {_settings.Speed = (int)Speeds.Moderate; EditSettings();}},
-            {"FAST", () => {_settings.Speed = (int)Speeds.Fast; EditSettings();}},
-            {"Back", EditSettings},
+        void SetGameSpeed(Speeds speed)
+        {
+            _settings.Speed = (int)speed;
+            SetSpeed(); //to redraw
+        }
+
+        string GetLabel(Speeds speed) =>
+            _settings.Speed == (int)speed ? $"▸ {speed}" : speed.ToString();
+
+        var speedMenu = new Menu(new OrderedDictionary<string, Action> {
+        { GetLabel(Speeds.Slow),     () => SetGameSpeed(Speeds.Slow) },
+        { GetLabel(Speeds.Normal),   () => SetGameSpeed(Speeds.Normal) },
+        { GetLabel(Speeds.Moderate), () => SetGameSpeed(Speeds.Moderate) },
+        { GetLabel(Speeds.Fast),     () => SetGameSpeed(Speeds.Fast) },
+        { "Back",                    EditSettings },
         });
-        DisplayMenu(_gameSpeedMenu);
-        _input.ReadMenuOption(_gameSpeedMenu);
+
+        DisplayMenu(speedMenu);
+        _input.ReadMenuOption(speedMenu);
     }
     public void Exit()
     {
 
-        Console.SetCursorPosition(0, _settings.GameSize + 8);
+        Console.SetCursorPosition(0, 0);
         Environment.Exit(0);
     }
     public void InvokeAction(Menu menu)
@@ -153,8 +209,9 @@ public class View : IObservable
         $"Your score: {score}"
     ];
     }
-    private string[] BuildEnterNewName(int score){
-        return 
+    private string[] BuildEnterNewName(int score)
+    {
+        return
         [
             "Your name:",
             "",
@@ -162,7 +219,8 @@ public class View : IObservable
             $"Score: {score}"
         ];
     }
-    public string DisplaySaveWindow(int score){
+    public string DisplaySaveWindow(int score)
+    {
         DisplayBackground();
         const int WindowHeight = 7;
         const int WindowWidth = 30;
@@ -180,12 +238,13 @@ public class View : IObservable
         //string label = "Your name:";
         int labelLineIndex = 1; // first line
         int labelStartX = boxStartX + 1;
-        int inputX = labelStartX + (WindowWidth - lines.Length) / 4 ;
+        int inputX = labelStartX + (WindowWidth - lines.Length) / 4;
         int inputY = boxStartY + ((WindowHeight - lines.Length) / 2) + labelLineIndex;
         string name = _input.ReadNameInput(inputX, inputY);
         return name;
     }
-    public void DisplayBoxWithCenteredMessage(string message){
+    public void DisplayBoxWithCenteredMessage(string message)
+    {
         DisplayBackground();
 
         const int WindowHeight = 7;

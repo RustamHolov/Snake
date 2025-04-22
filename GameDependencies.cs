@@ -1,6 +1,7 @@
-public class GameDependencies{
-    public DataBase DataBase {get; private set;} = null!;
-    public Settings Settings {get; private set;} = null!;
+public class GameDependencies
+{
+    public DataBase DataBase { get; private set; } = null!;
+    public Settings Settings { get; private set; } = null!;
     public EventManager EventManager { get; private set; } = null!;
     public View View { get; private set; } = null!;
     public SnakeModel Snake { get; private set; } = null!;
@@ -15,31 +16,40 @@ public class GameDependencies{
     public MenuHoverListener MenuHoverListener { get; private set; } = null!;
     public MenuSelectedListener MenuSelectedListener { get; private set; } = null!;
     public SnakeTurnListener SnakeTurnListener { get; private set; } = null!;
-    public PauseListener PauseListener {get; private set;} = null!;
-    public ContinueListener ContinueListener {get; private set;} = null!;
-    public GameOverListener GameOverListener {get; private set;} = null!;
-    public GameStateListener GameStateListener {get; private set;} = null!;
+    public PauseListener PauseListener { get; private set; } = null!;
+    public ContinueListener ContinueListener { get; private set; } = null!;
+    public GameOverListener GameOverListener { get; private set; } = null!;
+    public GameStateListener GameStateListener { get; private set; } = null!;
     public SaveListener SaveListener { get; private set; } = null!;
+    public RatingListener RatingListener { get; private set; } = null!;
     private bool _firstRun = true;
 
-    public GameDependencies(){
+    public GameDependencies()
+    {
         DataBase = new DataBase();
         EventManager = new EventManager();
         Settings = new Settings(EventManager);
 
         InitializeGame();
-        SubscribeByState();        
+        SubscribeByState();
     }
     public void NewGame()
     {
-        if(!_firstRun){
+        if (!_firstRun)
+        {
             EventManager.ClearAllSubscriptions();
             InitializeGame();
             SubscribeByState();
+            Controller.GameLoop();
         }
-        Controller.GameLoop();
+        else
+        {
+            Controller.GameLoop();
+        }
+
     }
-    public void InitializeGame(){
+    public void InitializeGame()
+    {
         Snake = new SnakeModel(Settings.PixelSize, EventManager);
         Field = new Field(Settings.GameSize, Settings.GameSize, Settings.PixelSize, Snake, EventManager);
         Input = new Input(EventManager);
@@ -58,6 +68,7 @@ public class GameDependencies{
         GameOverListener = new GameOverListener(Controller);
         GameStateListener = new GameStateListener(this);
         SaveListener = new SaveListener(Controller);
+        RatingListener = new RatingListener(Controller);
     }
     public void SubscribeByState()
     {
@@ -83,6 +94,7 @@ public class GameDependencies{
         View.Subscribe(Event.Continue, ContinueListener);
         Settings.Subscribe(Event.Size, SetSizeListener);
         View.Subscribe(Event.Save, SaveListener);
+        View.Subscribe(Event.Rating, RatingListener);
         Settings.Subscribe(Event.State, GameStateListener);
     }
 
@@ -103,7 +115,8 @@ public class GameDependencies{
         Input.Subscribe(Event.MenuSelect, MenuSelectedListener);
         Settings.Subscribe(Event.State, GameStateListener);
     }
-    public void Run(){
+    public void Run()
+    {
         _firstRun = false;
     }
 }
