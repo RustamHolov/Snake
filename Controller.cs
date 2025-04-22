@@ -10,6 +10,8 @@ public class Controller
     private DataBase _db;
     public Settings Settings { get => _settings; }
     public bool GameRuning { get; set; } = true;
+    private bool _firstRun = true;
+    public bool FirstRun{get => _firstRun;}
     public Controller(View view, SnakeModel snake, Field field, Input input, Settings settings, DataBase dataBase)
     {
         _view = view;
@@ -25,10 +27,11 @@ public class Controller
     }
     public void GameLoop()
     {
+        _firstRun = false;
         _settings.GameState = GameState.Game;
         _view.DisplaySnakeInfo(_snake);
-        var bestScore = CalculateBestScore();
-        _view.DisplaRecord(bestScore.Name, bestScore.HighestValue);
+        var (Name, HighestValue) = CalculateBestScore();
+        _view.DisplaRecord(Name, HighestValue);
         _view.DisplayField(_field);
         while (GameRuning)
         {

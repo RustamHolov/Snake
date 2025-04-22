@@ -229,7 +229,7 @@ public class View : IObservable
     {
         return
         [
-            "Your name:",
+            "Enter your name:",
             "",
             "",
             $"Score: {score}"

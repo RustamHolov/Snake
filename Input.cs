@@ -84,6 +84,10 @@ public class Input : IObservable
         {
             var key = Console.ReadKey(true);
 
+            if(key.Key == ConsoleKey.Escape){
+                Notify(Event.GameOver);
+            }
+
             if (key.Key == ConsoleKey.Enter)
                 break;
 

@@ -22,7 +22,7 @@ public class GameDependencies
     public GameStateListener GameStateListener { get; private set; } = null!;
     public SaveListener SaveListener { get; private set; } = null!;
     public RatingListener RatingListener { get; private set; } = null!;
-    private bool _firstRun = true;
+    
 
     public GameDependencies()
     {
@@ -35,7 +35,7 @@ public class GameDependencies
     }
     public void NewGame()
     {
-        if (!_firstRun)
+        if (!Controller.FirstRun)
         {
             EventManager.ClearAllSubscriptions();
             InitializeGame();
@@ -90,6 +90,7 @@ public class GameDependencies
     {
         Input.Subscribe(Event.MenuHover, MenuHoverListener);
         Input.Subscribe(Event.MenuSelect, MenuSelectedListener);
+        Input.Subscribe(Event.GameOver, GameOverListener);
         View.Subscribe(Event.NewGame, NewGameListener);
         View.Subscribe(Event.Continue, ContinueListener);
         Settings.Subscribe(Event.Size, SetSizeListener);
@@ -114,9 +115,5 @@ public class GameDependencies
         Input.Subscribe(Event.MenuHover, MenuHoverListener);
         Input.Subscribe(Event.MenuSelect, MenuSelectedListener);
         Settings.Subscribe(Event.State, GameStateListener);
-    }
-    public void Run()
-    {
-        _firstRun = false;
     }
 }
