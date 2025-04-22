@@ -26,7 +26,8 @@ public class Controller
     {
         _settings.GameState = GameState.Game;
         _view.DisplaySnakeInfo(_snake);
-        _view.DisplaRecord(CalculateBestScore().HighestValue);
+        var bestScore = CalculateBestScore();
+        _view.DisplaRecord(bestScore.Name, bestScore.HighestValue);
         _view.DisplayField(_field);
         while (GameRuning)
         {
@@ -36,15 +37,23 @@ public class Controller
         }
     }
     public void GameOver(){
-        _db.AddRecord("Rustam",_snake.FoodEated);
         _field.GetRidOfSnake();
         _view.DisplayGameOver(_snake.FoodEated);
     }
-    public (string? Key, int HighestValue) CalculateBestScore(){
+    public void SaveRecord(){
+        string name = _view.DisplaySaveWindow(_snake.FoodEated);
+        _db.AddRecord(name, _snake.FoodEated);
+        if(_db.SaveToCSV()){
+            _view.DisplayBoxWithCenteredMessage("Saved successfully!");
+        }else{
+            _view.DisplayBoxWithCenteredMessage("Fail saving...");
+        }
+    }
+    public (string Name, int HighestValue) CalculateBestScore(){
         var records = _db.Records;
         if (records == null || !records.Any())
         {
-            return (null, int.MinValue); // Or throw an exception
+            return ("", int.MinValue); 
         }
 
         string? keyWithMax = null;
@@ -61,6 +70,6 @@ public class Controller
                 }
             }
         }
-        return (keyWithMax, maxRecord);
+        return (keyWithMax ?? string.Empty, maxRecord);
     }
 }

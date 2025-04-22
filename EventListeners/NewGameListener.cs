@@ -9,6 +9,7 @@ public class NewGameListener : EventListener
     }
     public void Update(object? args = null)
     {
+        _gameDependencies.Run();
         _gameDependencies.NewGame();
     }
 }

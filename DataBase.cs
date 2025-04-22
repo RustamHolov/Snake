@@ -1,109 +1,96 @@
-using System.Collections.ObjectModel;
-using System.Text;
 
 public class DataBase
 {
-    private Dictionary<string, List<int>> _records { get; set; } = new();
-    public Dictionary<string, List<int>> Records {get => _records;}
-    public bool edited = false;
-    private readonly string _csvPath = "recordsDB.csv";
     private readonly string _titles = "Name,Score";
-    public void AddRecord(string name, int score)
-    {
+    private string _csvPath;
+    private Dictionary<string, List<int>> _records = new();
 
-        if(!_records.ContainsKey(name)){
-            _records.Add(name, new List<int>{score});
-        }else{
-            _records.TryGetValue(name, out List<int>? scores);
-            scores?.Add(score);
-        }
+    public IReadOnlyDictionary<string, List<int>> Records => _records;
+    public bool Edited { get; private set; } = false;
 
-    }
-    public void DeleteUser(string name)
-    {
-        if (_records.ContainsKey(name))
-        {
-            _records.Remove(name);
-        }
-        else
-        {
-            throw new Exception("Member not found");
-        }
-    }
-
-    public DataBase()
-    {
-        InitializeDataBase();
-    }
-    public DataBase(string path)
+    public DataBase(string path = "recordsDB.csv")
     {
         _csvPath = path;
         InitializeDataBase();
     }
-    private void InitializeDataBase()
+
+    public void AddRecord(string name, int score)
     {
-        if (File.Exists(_csvPath))
+        if (!_records.TryGetValue(name, out var scores))
         {
-            LoadFromCSV();
+            _records[name] = new List<int> { score };
         }
         else
         {
-            _records = new ();
-            SaveToCSV();
+            scores.Add(score);
         }
+        Edited = true;
     }
+
+    public void DeleteUser(string name)
+    {
+        if (!_records.Remove(name))
+        {
+            throw new InvalidOperationException("User not found.");
+        }
+        Edited = true;
+    }
+
+    private void InitializeDataBase()
+    {
+        if (File.Exists(_csvPath))
+            LoadFromCSV();
+        else
+            SaveToCSV();
+    }
+
     public void LoadFromCSV()
     {
         _records.Clear();
         try
         {
-            using (StreamReader reader = new StreamReader(_csvPath))
+            using var reader = new StreamReader(_csvPath);
+            string[] headers = reader.ReadLine()?.Split(',') ?? throw new InvalidDataException("CSV missing header.");
+            string? line;
+            while ((line = reader.ReadLine()) != null)
             {
-                string[] titles = reader.ReadLine()?.Split(',') ?? throw new Exception("No header found");
-                string? line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    string[] values = line.Split(','); // getting values from entry
-                    if (titles.Length != values.Length) throw new Exception("Something went wrong with tables");
-                    if(int.TryParse(values[1], out int score)){
-                        AddRecord(values[0], score);
-                    }else{
-                        throw new Exception("wrong data");
-                    }
-                }
+                var (name, score) = ParseCsvLine(line);
+                AddRecord(name, score);
             }
         }
         catch (Exception e)
         {
-            throw new Exception("Error loading from CSV: " + e.Message);
+            throw new Exception("Error loading from CSV: " + e.Message, e);
         }
     }
 
-    public void SaveToCSV()
+    private (string name, int score) ParseCsvLine(string line)
+    {
+        var parts = line.Split(',');
+        if (parts.Length != 2 || !int.TryParse(parts[1], out var score))
+            throw new FormatException($"Invalid line: {line}");
+        return (parts[0], score);
+    }
+
+    public bool SaveToCSV()
     {
         try
         {
-            using (StreamWriter sw = new StreamWriter(_csvPath))
+            using var sw = new StreamWriter(_csvPath);
+            sw.WriteLine(_titles);
+            foreach (var kvp in _records)
             {
-                sw.WriteLine(_titles);
-                foreach (var recordEntry in _records)
+                foreach (var score in kvp.Value)
                 {
-                    string line;
-                    string name = recordEntry.Key;
-                    List<int> scores = recordEntry.Value;
-                    string[] titlesArray = GetTitles(_titles);
-                    foreach(int score in scores){
-                        line = $"{name},{score}";
-                        sw.WriteLine(line);
-                    }
+                    sw.WriteLine($"{kvp.Key},{score}");
                 }
             }
+            Edited = false;
+            return true;
         }
         catch (Exception e)
         {
-            throw new Exception("Error saving to CSV: " + e.Message);
+            throw new Exception("Error saving to CSV: " + e.Message, e);
         }
     }
-
-    public string[] GetTitles(string titles) => titles.Split(',');
 }

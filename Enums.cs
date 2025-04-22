@@ -18,7 +18,8 @@ public enum Event{
     Pause,
     Continue,
     GameOver,
-    State
+    State,
+    Save
 }
 public enum GameSizes{
     Normal = 20,
