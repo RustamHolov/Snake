@@ -11,6 +11,7 @@ public class SnakeModel : IObservable
     private Cell _body;
     private Cell _tail;
     private int _foodEated = 0;
+    private Queue<Vector> _turns = [];
     public Vector MoveDirection { get => _moveDirection; }
     public EventManager Events { get => _events; set { _events = value; } }
     public List<Cell> Parts { get => _parts; set { _parts = value; } }
@@ -37,14 +38,25 @@ public class SnakeModel : IObservable
         {
             return; // Cannot move in the opposite direction
         }
-        _moveDirection = direction;
+        if(_moveDirection == Vector.NotMoving){ // to start the game (first move)
+            _moveDirection = direction;
+            _turns.Enqueue(direction);
+        }else{
+            _turns.Enqueue(direction);
+        }
+        //TODO create moving event, add new one only after previous would became completed
     }
     public void Move()
     {
         if (_moveDirection != Vector.NotMoving)
         {
             Moved = true;
-            Notify(Event.Move, _moveDirection);
+            if (_turns.Count > 0){
+                _moveDirection = _turns.Dequeue();
+                Notify(Event.Move, _moveDirection);
+            }else{
+                Notify(Event.Move, _moveDirection);
+            }
         }
     }
     public void Eat(Cell food, out Body newBodyPart)
