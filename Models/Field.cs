@@ -207,6 +207,7 @@ public class Field : IRenderable, IObservable
         bool uroboros = _snakeLocation.ContainsValue(newHeadCoordinates); // check if next cell is snake itself
         if (uroboros)
         {
+            PlaceOnCanvas(new SnakeModel.Uroboros(Size), newHeadCoordinates);
             Notify(Event.GameOver);
             return;
         }

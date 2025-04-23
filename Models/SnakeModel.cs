@@ -16,7 +16,6 @@ public class SnakeModel : IObservable
     public EventManager Events { get => _events; set { _events = value; } }
     public List<Cell> Parts { get => _parts; set { _parts = value; } }
     public int FoodEated { get => _foodEated; }
-    public bool Moved {get; private set;} = false;
     public SnakeModel(int size, EventManager events)
     {
         _cellSize = size;
@@ -29,12 +28,14 @@ public class SnakeModel : IObservable
 
     public void Turn(Vector direction)
     {
+        //TODO check if turns empty
         // Check for opposite directions
-        if ((_moveDirection == Vector.Left && direction == Vector.Right) ||
-            (_moveDirection == Vector.Right && direction == Vector.Left) ||
-            (_moveDirection == Vector.Up && direction == Vector.Down) ||
-            (_moveDirection == Vector.Down && direction == Vector.Up) ||
-             (_moveDirection == Vector.NotMoving && direction == Vector.Left)) // cannot move initialy backwards
+        Vector currentDirection = _turns.Count > 0 ? _turns.Last() : _moveDirection;
+        if ((currentDirection == Vector.Left && direction == Vector.Right) ||
+            (currentDirection == Vector.Right && direction == Vector.Left) ||
+            (currentDirection == Vector.Up && direction == Vector.Down) ||
+            (currentDirection == Vector.Down && direction == Vector.Up) ||
+            (currentDirection == Vector.NotMoving && direction == Vector.Left)) // cannot move initialy backwards
         {
             return; // Cannot move in the opposite direction
         }
@@ -44,13 +45,12 @@ public class SnakeModel : IObservable
         }else{
             _turns.Enqueue(direction);
         }
-        //TODO create moving event, add new one only after previous would became completed
+        
     }
     public void Move()
     {
         if (_moveDirection != Vector.NotMoving)
         {
-            Moved = true;
             if (_turns.Count > 0){
                 _moveDirection = _turns.Dequeue();
                 Notify(Event.Move, _moveDirection);
@@ -121,6 +121,20 @@ public class SnakeModel : IObservable
             for (int i = 0; i < Height; i++)
             {
                 builder.AppendLine(new string('░', Width));
+            }
+
+            return builder.ToString();
+        }
+
+    }
+    public class Uroboros(int size) : Cell(size, empty: false)
+    {
+        public override string Render()
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < Height; i++)
+            {
+                builder.AppendLine(new string('▚', Width));
             }
 
             return builder.ToString();

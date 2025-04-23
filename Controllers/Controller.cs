@@ -54,6 +54,7 @@ public class Controller
     public void GameOver()
     {
         _field.GetRidOfSnake();
+        Thread.Sleep(100); //delay before showing game over message
         _view.DisplayGameOver(_snake.FoodEated);
     }
     public void SaveRecord()
