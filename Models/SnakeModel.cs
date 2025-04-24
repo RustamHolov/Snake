@@ -28,7 +28,6 @@ public class SnakeModel : IObservable
 
     public void Turn(Vector direction)
     {
-        //TODO check if turns empty
         // Check for opposite directions
         Vector currentDirection = _turns.Count > 0 ? _turns.Last() : _moveDirection;
         if ((currentDirection == Vector.Left && direction == Vector.Right) ||

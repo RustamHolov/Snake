@@ -7,6 +7,14 @@ public class RatingListener : EventListener
     }
     public void Update(object? args = null)
     {
-        _controller.Leaderboard();
+        if (args != null && args is int page)
+        {
+            _controller.ViewLeaderboard(page);
+        }
+        else
+        {
+            _controller.ViewLeaderboard();
+        }
+        
     }
 }

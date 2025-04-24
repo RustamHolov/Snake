@@ -46,7 +46,6 @@ public class GameDependencies
         {
             Controller.GameLoop();
         }
-
     }
     public void InitializeGame()
     {

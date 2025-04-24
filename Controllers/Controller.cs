@@ -11,7 +11,7 @@ public class Controller
     public Settings Settings { get => _settings; }
     public bool GameRuning { get; set; } = true;
     private bool _firstRun = true;
-    public bool FirstRun{get => _firstRun;}
+    public bool FirstRun { get => _firstRun; }
     public Controller(View view, SnakeModel snake, Field field, Input input, Settings settings, DataBase dataBase)
     {
         _view = view;
@@ -31,7 +31,7 @@ public class Controller
         _settings.GameState = GameState.Game;
         _view.DisplaySnakeInfo(_snake);
         var (Name, HighestValue) = CalculateBestScore();
-        _view.DisplaRecord(Name, HighestValue);
+        _view.DisplayHighestScore(Name, HighestValue);
         _view.DisplayField(_field);
         Stopwatch stopwatch = new Stopwatch();
         long lastUpdate = 0;
@@ -48,13 +48,13 @@ public class Controller
                 _snake.Move();
                 lastUpdate = elapsed;
             }
-            Thread.Sleep(1);
+            Thread.Sleep(5);
         }
     }
     public void GameOver()
     {
         _field.GetRidOfSnake();
-        Thread.Sleep(100); //delay before showing game over message
+        Thread.Sleep(200); //delay before showing game over message
         _view.DisplayGameOver(_snake.FoodEated);
     }
     public void SaveRecord()
@@ -94,7 +94,7 @@ public class Controller
         }
         return (keyWithMax ?? string.Empty, maxRecord);
     }
-    public void Leaderboard()
+    public void ViewLeaderboard(int page = 0)
     {
         var records = _db.Records;
 
@@ -112,7 +112,13 @@ public class Controller
         }
 
         var sorted = leaderboard.OrderByDescending(entry => entry.Value).ToList();
-
-        _view.DisplayRecords(sorted);
+        if (page != 0)
+        {
+            _view.DisplayRecords(sorted, page);
+        }
+        else
+        {
+            _view.DisplayRecords(sorted);
+        }
     }
 }

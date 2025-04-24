@@ -14,6 +14,7 @@ public class Field : IRenderable, IObservable
     private EventManager _events;
 
     private Dictionary<Cell, (int, int)> _snakeLocation = new Dictionary<Cell, (int, int)>();
+    private static readonly Random _random = new Random();
     public EventManager Events { get => _events; set { _events = value; } }
     public int Size { get => _cellSize; set{ _cellSize = value;}}
     public int Height { get => _height; set{_height = value;} }
@@ -44,13 +45,15 @@ public class Field : IRenderable, IObservable
 
     public Dictionary<(int, int), (int, int)> BuildCellPixelMapping()
     {
-        Dictionary<(int, int), (int, int)> links = [];
+        Dictionary<(int, int), (int, int)> links = new Dictionary<(int, int), (int, int)>();
         for (int i = 0; i < _grid.GetLength(0); i++)
         {
             for (int j = 0; j < _grid.GetLength(1); j++)
             {
                 var cellAdress = (i, j);
-                var matrixAdress = (i * _cellSize, j * _cellSize * 2); //????????????????
+                // The row index is scaled by `_cellSize`, and the column index is scaled by `_cellSize * 2` 
+                // to account for the rectangular aspect ratio of the canvas cells.
+                var matrixAdress = (i * _cellSize, j * _cellSize * 2);
                 links.Add(cellAdress, matrixAdress);
             }
         }
@@ -100,7 +103,7 @@ public class Field : IRenderable, IObservable
     public void GetRidOfSnake(){
         _snakeLocation.Clear();
     }
-    public void FillCanvas()
+    public void FillCanvas()    
     {
         for (int i = 0; i < _grid.GetLength(0); i++)
         {
@@ -131,10 +134,9 @@ public class Field : IRenderable, IObservable
                 maxStringLength = 1;
             }
         }
-
         // Calculate total width of the box
-        int boxWidth = cols * (maxStringLength + 0) + 2; // +2 for the box borders
-
+        int boxWidth = cols * maxStringLength + 2; // +2 for the box borders
+        
         StringBuilder result = new StringBuilder();
 
         // Draw top border
@@ -168,7 +170,7 @@ public class Field : IRenderable, IObservable
 
     public (int, int) GetRandomPosition()
     {
-        return (new Random().Next(0, _grid.GetLength(0)), new Random().Next(0, _grid.GetLength(1)));
+        return (_random.Next(0, _grid.GetLength(0)), _random.Next(0, _grid.GetLength(1)));
     }
     public void PlaceSnake()
     {
@@ -207,7 +209,9 @@ public class Field : IRenderable, IObservable
         bool uroboros = _snakeLocation.ContainsValue(newHeadCoordinates); // check if next cell is snake itself
         if (uroboros)
         {
-            PlaceOnCanvas(new SnakeModel.Uroboros(Size), newHeadCoordinates);
+            var uroborosCell = new SnakeModel.Uroboros(Size);
+            PlaceOnCanvas(uroborosCell, newHeadCoordinates);
+            _grid[newHeadCoordinates.x, newHeadCoordinates.y] = uroborosCell;
             Notify(Event.GameOver);
             return;
         }

@@ -69,7 +69,7 @@ public class View : IObservable
         Notify(Event.Rating);
     }
 
-    public void DisplayRecords(List<KeyValuePair<string, int>> leaderboard)
+    public void DisplayRecords(List<KeyValuePair<string, int>> leaderboard, int page = 0)
     {
         var backMenu = new Menu(new OrderedDictionary<string, Action>
     {
@@ -82,40 +82,89 @@ public class View : IObservable
         int gameHeight = _settings.GameSize;
         int gameWidth = _settings.GameSize * 2;
 
-        // Title display
-        int titleY = 3;
-        int titleX = (gameWidth - title.Length) / 2;
-        Console.SetCursorPosition(titleX, titleY);
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine(title);
-        Console.ResetColor();
+        DisplayTitle(title, gameWidth, y: 3);
 
-        // Start displaying records below title
-        int recordsStartY = titleY + 2;
+        int recordsStartY = 5;
         int paddingX = 4;
         int maxWidth = gameWidth - (paddingX * 2);
+        int maxHeight = gameHeight - 4;
 
-        int maxNameLength = leaderboard.Max(e => e.Key.Length);
-        int maxScoreLength = leaderboard.Max(e => e.Value.ToString().Length);
-        int rankWidth = leaderboard.Count.ToString().Length + 1; // e.g., "10." is 3 chars
+        int totalPages = (leaderboard.Count + maxHeight - 1) / maxHeight;
+        int currentPage = Math.Clamp(page, 0, totalPages - 1);
 
-        for (int i = 0; i < leaderboard.Count; i++)
+        AddPaginationOptions(backMenu, currentPage, totalPages);
+
+        int start = currentPage * maxHeight;
+        int take = Math.Min(maxHeight, leaderboard.Count - start);
+        var pageItems = leaderboard.GetRange(start, take);
+
+        // Prepare full display list with true rank info
+        List<(int Rank, KeyValuePair<string, int> Entry)> displayItems = [];
+
+        for (int i = 0; i < pageItems.Count; i++)
         {
-            var entry = leaderboard[i];
-            string rank = $"{i + 1}.";
-            string name = entry.Key;
-            string score = entry.Value.ToString();
-
-            string line = rank.PadRight(rankWidth) + name;
-            int dotsNeeded = Math.Max(1, maxWidth - line.Length - score.Length);
-            line += new string('.', dotsNeeded) + score;
-
-            Console.SetCursorPosition(paddingX, recordsStartY + i);
-            Console.WriteLine(line);
+            displayItems.Add((start + i + 1, pageItems[i]));
         }
+
+        // Add divider and last record only on non-final pages
+        if (currentPage < totalPages - 1)
+        {
+            displayItems.Add((-1, new KeyValuePair<string, int>("......", 0))); // divider
+            var lastEntry = leaderboard.Last();
+            int lastRank = leaderboard.Count;
+            displayItems.Add((lastRank, lastEntry));
+        }
+
+        PageViewWithRanks(paddingX, recordsStartY, maxWidth, displayItems);
 
         DisplayHorizontalMenu(backMenu);
         _input.ReadHorisontalMenuOption(backMenu);
+    }
+    private void DisplayTitle(string title, int width, int y)
+    {
+        int x = (width - title.Length) / 2;
+        Console.SetCursorPosition(x, y);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine(title);
+        Console.ResetColor();
+    }
+
+    private void AddPaginationOptions(Menu menu, int currentPage, int totalPages)
+    {
+        if (currentPage > 0)
+            menu.Add("Previous page", PreviousPage);
+
+        if (currentPage < totalPages - 1)
+            menu.Add("Next page", NextPage);
+    }
+    private void PreviousPage()
+    {
+        Notify(Event.Rating, -1);
+    }
+    private void NextPage()
+    {
+        Notify(Event.Rating, 1);
+    }
+    private void PageViewWithRanks(int x, int y, int maxWidth, List<(int Rank, KeyValuePair<string, int> Entry)> rankedEntries)
+    {
+        for (int i = 0; i < rankedEntries.Count; i++)
+        {
+            var (rank, entry) = rankedEntries[i];
+
+            Console.SetCursorPosition(x, y + i);
+
+            if (rank == -1)
+            {
+                Console.WriteLine(new string('.', maxWidth)); // Divider line
+                continue;
+            }
+
+            string name = entry.Key;
+            int score = entry.Value;
+            string rankName = $"{rank}. {name}";
+            string line = rankName + new string('.',maxWidth - score.ToString().Length - rankName.Length) + score;
+            Console.WriteLine(line);
+        }
     }
     public void EditSettings()
     {
@@ -126,12 +175,12 @@ public class View : IObservable
     {
         void SetGameSize(GameSizes size)
         {
-            if(_mainMenu.Options.TryGetValue("Continue", out _)) _mainMenu.Remove("Continue"); //changing size unable continue 
+            if (_mainMenu.Options.TryGetValue("Continue", out _)) _mainMenu.Remove("Continue"); //changing size unable continue 
             _settings.GameSize = (int)size;
             SetSize(); // to redraw
         }
         string GetLabel(GameSizes size) =>
-            _settings.GameSize == (int)size ? $"▸ {size}" : size.ToString();
+            _settings.GameSize == (int)size ? $"● {size}" : size.ToString();
 
         var _gameSizeMenu = new Menu(new OrderedDictionary<string, Action>{
             {GetLabel(GameSizes.Normal), () => SetGameSize(GameSizes.Normal)},
@@ -139,10 +188,10 @@ public class View : IObservable
             {GetLabel(GameSizes.Big),    () => SetGameSize(GameSizes.Big)},
             {"Back",                      EditSettings},
         });
-        
+
         DisplayMenu(_gameSizeMenu);
         _input.ReadMenuOption(_gameSizeMenu);
-        
+
     }
     public void SetSpeed()
     {
@@ -153,7 +202,7 @@ public class View : IObservable
         }
 
         string GetLabel(Speeds speed) =>
-            _settings.Speed == (int)speed ? $"▸ {speed}" : speed.ToString();
+            _settings.Speed == (int)speed ? $"● {speed}" : speed.ToString();
 
         var speedMenu = new Menu(new OrderedDictionary<string, Action> {
         { GetLabel(Speeds.Slow),     () => SetGameSpeed(Speeds.Slow) },
@@ -168,7 +217,6 @@ public class View : IObservable
     }
     public void Exit()
     {
-
         Console.SetCursorPosition(0, 0);
         Environment.Exit(0);
     }
@@ -183,7 +231,7 @@ public class View : IObservable
         Console.WriteLine($"Score: {snake.FoodEated}");
         Console.ResetColor();
     }
-    public void DisplaRecord(string name, int record)
+    public void DisplayHighestScore(string name, int record)
     {
         int scoreLineLength = name.Length + 6 + $"{record}".Length;
         Console.SetCursorPosition(_settings.GameSize * 2 - scoreLineLength, 0);
@@ -322,7 +370,7 @@ public class View : IObservable
 
         for (int i = 0; i < optionKeys.Count; i++)
         {
-            string prefix = i == menu.Selected ? ">" : " ";
+            string prefix = i == menu.Selected ? "▸" : " ";
             string optionText = optionKeys[i];
 
             if (i == menu.Selected) Console.ForegroundColor = ConsoleColor.Yellow;
@@ -353,7 +401,7 @@ public class View : IObservable
 
         for (int i = 0; i < options.Count; i++)
         {
-            string prefix = i == menu.Selected ? ">" : " ";
+            string prefix = i == menu.Selected ? "▸" : " ";
             string optionText = options[i];
 
             Console.SetCursorPosition(startX, startY + i);
