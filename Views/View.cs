@@ -85,9 +85,9 @@ public class View : IObservable
         DisplayTitle(title, gameWidth, y: 3);
 
         int recordsStartY = 5;
-        int paddingX = 4;
+        int paddingX = 5;
         int maxWidth = gameWidth - (paddingX * 2);
-        int maxHeight = gameHeight - 4;
+        int maxHeight = gameHeight - 4  - 2;
 
         int totalPages = (leaderboard.Count + maxHeight - 1) / maxHeight;
         int currentPage = Math.Clamp(page, 0, totalPages - 1);
@@ -109,7 +109,7 @@ public class View : IObservable
         // Add divider and last record only on non-final pages
         if (currentPage < totalPages - 1)
         {
-            displayItems.Add((-1, new KeyValuePair<string, int>("......", 0))); // divider
+            displayItems.Add((-1, new KeyValuePair<string, int>("...", 0))); // divider
             var lastEntry = leaderboard.Last();
             int lastRank = leaderboard.Count;
             displayItems.Add((lastRank, lastEntry));
@@ -155,7 +155,7 @@ public class View : IObservable
 
             if (rank == -1)
             {
-                Console.WriteLine(new string('.', maxWidth)); // Divider line
+                Console.WriteLine(new string('.', 3)); // Divider line 
                 continue;
             }
 
@@ -358,7 +358,7 @@ public class View : IObservable
         int totalOptionsLength = optionKeys.Sum(key => key.Length);
         int gameHeight = _settings.GameSize;
         int gameWidth = _settings.GameSize * 2;
-        int startY = gameHeight + 5;
+        int startY = gameHeight + 4;
 
         int spacing = Math.Max(1, (gameWidth - totalOptionsLength) / optionKeys.Count);
         int startX = 1;
@@ -417,10 +417,21 @@ public class View : IObservable
     }
     public void DisplayBackground()
     {
-        Console.Clear();
+        //Clear header
+        Console.SetCursorPosition(0, 0);
+        Console.Write(new string(' ', _settings.GameSize * 2 + 10));
+        Console.SetCursorPosition(0, 1);
+        Console.Write(new string(' ', _settings.GameSize * 2 + 10));
+
+        Console.SetCursorPosition(0, 2);
         Console.ForegroundColor = ConsoleColor.DarkGray;
         DisplayField(_backgroundField);
         Console.ResetColor();
+        //Clear footer
+        Console.SetCursorPosition(0, _settings.GameSize+4);
+        Console.Write(new string(' ', _settings.GameSize * 2 + 10));
+        Console.SetCursorPosition(0, _settings.GameSize+5);
+        Console.Write(new string(' ', _settings.GameSize * 2 + 10));
     }
     public void Start()
     {
