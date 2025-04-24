@@ -11,6 +11,7 @@ public class View : IObservable
     private Input _input;
     private EventManager _events;
     private Field _backgroundField;
+    private int _currentLeaderboardPage = 0;
     public EventManager Events { get => _events; set { _events = value; } }
 
     public View(EventManager events, Input input, Field field, Settings settings)
@@ -75,7 +76,7 @@ public class View : IObservable
         Notify(Event.Rating);
     }
 
-    public void DisplayRecords(List<KeyValuePair<string, int>> leaderboard, int page = 0)
+    public void DisplayRecords(List<KeyValuePair<string, int>> leaderboard, int pageDelta = 0)
     {
         var backMenu = new Menu(new OrderedDictionary<string, Action>
     {
@@ -94,13 +95,13 @@ public class View : IObservable
         int paddingX = 5;
         int maxWidth = gameWidth - (paddingX * 2);
         int maxHeight = gameHeight - 4  - 2;
+    
+        int totalPages = (int)Math.Ceiling((double)leaderboard.Count / maxHeight);
+        _currentLeaderboardPage = Math.Clamp(_currentLeaderboardPage + pageDelta, 0, totalPages );
 
-        int totalPages = (leaderboard.Count + maxHeight - 1) / maxHeight;
-        int currentPage = Math.Clamp(page, 0, totalPages - 1);
+        AddPaginationOptions(backMenu, _currentLeaderboardPage, totalPages );
 
-        AddPaginationOptions(backMenu, currentPage, totalPages);
-
-        int start = currentPage * maxHeight;
+        int start = _currentLeaderboardPage * maxHeight;
         int take = Math.Min(maxHeight, leaderboard.Count - start);
         var pageItems = leaderboard.GetRange(start, take);
 
@@ -113,7 +114,7 @@ public class View : IObservable
         }
 
         // Add divider and last record only on non-final pages
-        if (currentPage < totalPages - 1)
+        if (_currentLeaderboardPage < totalPages - 1)
         {
             displayItems.Add((-1, new KeyValuePair<string, int>("...", 0))); // divider
             var lastEntry = leaderboard.Last();
