@@ -6,6 +6,7 @@ public class View : IObservable
     private Menu _mainMenu;
     private Menu _settingsMenu;
     private Menu _gameOverMenu;
+    private Menu _pauseMenu;
     private Settings _settings;
     private Input _input;
     private EventManager _events;
@@ -25,17 +26,24 @@ public class View : IObservable
             { "Settings", EditSettings},
             { "Exit", Exit}});
         _settingsMenu = new Menu(new OrderedDictionary<string, Action>(){
-            {"Game size", SetSize},
-            {"Speed", SetSpeed},
-            {"Back", Start}
+            { "Game size", SetSize},
+            { "Speed", SetSpeed},
+            { "Back", Start}
         });
 
         _gameOverMenu = new Menu(new OrderedDictionary<string, Action>(){
-            {"New game", NewGame},
-            {"Save score", Save},
-            {"Main Menu", Start},
-            {"Exit", Exit}
+            { "New game", NewGame},
+            { "Save score", Save},
+            { "Main Menu", Start},
+            { "Exit", Exit}
         });
+        _pauseMenu = new Menu(new OrderedDictionary<string, Action>(){
+            { "Continue", Continue},
+            { "New game", NewGame},
+            { "Rating", Rating},
+            { "Settings", EditSettings},
+            { "Main Menu", Start},
+            { "Exit", Exit}});
 
 
     }
@@ -55,14 +63,12 @@ public class View : IObservable
     }
     public void Continue()
     {
-        _mainMenu.Remove("Continue");
         Notify(Event.Continue);
     }
     public void OnPause()
     {
-        _mainMenu.Options.Insert(0, "Continue", Continue);
-        DisplayMenu(_mainMenu);
-        _input.ReadMenuOption(_mainMenu);
+        DisplayMenu(_pauseMenu);
+        _input.ReadMenuOption(_pauseMenu);
     }
     public void Rating()
     {

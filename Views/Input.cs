@@ -28,7 +28,6 @@ public class Input : IObservable
                         continue;
                 }
             }
-            
         }
     }
     public void ReadHorisontalMenuOption(Menu menu){
