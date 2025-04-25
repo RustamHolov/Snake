@@ -8,6 +8,7 @@ public class SetSizeListener : EventListener
     public void Update(object? args)
     {
        if(args is int size){
+            Console.Clear();
             _field.SetSize(size);
         }
     }

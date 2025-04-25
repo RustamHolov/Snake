@@ -269,17 +269,24 @@ public class View : IObservable
         {
             int contentStartX = boxStartX + (boxWidth - lines[i].Length) / 2;
             Console.SetCursorPosition(contentStartX, contentStartY + i);
-            Console.WriteLine(lines[i]);
+            if( lines[i].Trim().Contains("Game Over", StringComparison.OrdinalIgnoreCase)){
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(lines[i]);
+                Console.ResetColor();
+            }else{
+                Console.WriteLine(lines[i]);
+            } 
         }
     }
 
-    private string[] BuildGameOverMessage(int score)
+    private string[] BuildGameOverMessage(int score, int rank, int recordsCount)
     {
         return
         [
         "  Game Over  ",
         "",
-        $"Your score: {score}"
+        $"Your score: {score}",
+        $"Your rank: {rank}/{recordsCount}"
     ];
     }
     private string[] BuildEnterNewName(int score)
@@ -332,7 +339,7 @@ public class View : IObservable
         DisplayHorizontalMenu(_gameOverMenu);
         _input.ReadHorisontalMenuOption(_gameOverMenu);
     }
-    public void DisplayGameOver(int score)
+    public void DisplayGameOver(int score, (int rank, int recordsCount) rate)
     {
         DisplayBackground();
 
@@ -344,7 +351,7 @@ public class View : IObservable
         (int boxStartX, int boxStartY) = CalculateCenteredPosition(consoleWidth, consoleHeight, WindowWidth, WindowHeight);
 
         DrawBox(boxStartX, boxStartY, WindowWidth, WindowHeight);
-        DisplayCenteredText(BuildGameOverMessage(score), boxStartX, boxStartY, WindowWidth, WindowHeight);
+        DisplayCenteredText(BuildGameOverMessage(score, rate.rank, rate.recordsCount), boxStartX, boxStartY, WindowWidth, WindowHeight);
         DisplayHorizontalMenu(_gameOverMenu);
         _input.ReadHorisontalMenuOption(_gameOverMenu);
     }

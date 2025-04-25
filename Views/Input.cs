@@ -68,7 +68,7 @@ public class Input : IObservable
             }
         }
     }
-    public string ReadNameInput(int startX, int startY, int maxLength = 15)
+    public string ReadNameInput(int startX, int startY, int maxLength = 20)
     {
         var input = new StringBuilder();
         int warningX = startX;

@@ -55,7 +55,15 @@ public class Controller
     {
         _field.GetRidOfSnake();
         Thread.Sleep(200); //delay before showing game over message
-        _view.DisplayGameOver(_snake.FoodEated);
+        var rate = GetRank(_snake.FoodEated);
+        _view.DisplayGameOver(_snake.FoodEated, rate);
+    }
+    private (int rank, int recordsCount) GetRank(int score){
+        var ranks = new List<int>();
+        _db.Records.ToList().ForEach(pair => pair.Value.ForEach(score => ranks.Add(score)));
+        ranks.Add(score);
+        ranks = ranks.OrderByDescending(rank => rank).ToList();
+        return (ranks.LastIndexOf(score), ranks.Count);
     }
     public void SaveRecord()
     {
