@@ -3,16 +3,16 @@ using System.Collections.Specialized;
 
 public class View : IObservable
 {
-    private Menu _mainMenu;
-    private Menu _settingsMenu;
-    private Menu _gameOverMenu;
-    private Menu _pauseMenu;
-    private Settings _settings;
-    private Input _input;
-    private EventManager _events;
-    private Field _backgroundField;
+    private readonly Menu _mainMenu;
+    private readonly Menu _settingsMenu;
+    private readonly Menu _gameOverMenu;
+    private readonly Menu _pauseMenu;
+    private readonly Settings _settings;
+    private readonly Input _input;
+    private readonly EventManager _events;
+    private readonly Field _backgroundField;
     private int _currentLeaderboardPage = 0;
-    public EventManager Events { get => _events; set { _events = value; } }
+    public EventManager Events { get => _events; }
 
     public View(EventManager events, Input input, Field field, Settings settings)
     {
@@ -31,7 +31,6 @@ public class View : IObservable
             { "Speed", SetSpeed},
             { "Back", Start}
         });
-
         _gameOverMenu = new Menu(new OrderedDictionary<string, Action>(){
             { "New game", NewGame},
             { "Save score", Save},
@@ -45,17 +44,13 @@ public class View : IObservable
             { "Settings", EditSettings},
             { "Main Menu", Start},
             { "Exit", Exit}});
-
-
     }
-    public void DisplayField(Field field)
+
+    #region MenuPublicMethods
+    public void Start()
     {
-        Console.SetCursorPosition(0, 2);
-        Console.WriteLine(field.Render());
-    }
-    public void Save()
-    {
-        Notify(Event.Save);
+        DisplayMenu(_mainMenu);
+        _input.ReadMenuOption(_mainMenu);
     }
     public void NewGame()
     {
@@ -75,153 +70,6 @@ public class View : IObservable
     {
         Notify(Event.Rating);
     }
-
-    public void DisplayRecords(List<KeyValuePair<string, int>> leaderboard, int pageDelta = 0)
-    {
-        var backMenu = new Menu(new OrderedDictionary<string, Action>
-    {
-        { "Back", Start },
-    });
-
-        DisplayBackground();
-
-        string title = "♔ Leaderboard ♔";
-        int gameHeight = _settings.GameSize;
-        int gameWidth = _settings.GameSize * 2;
-
-        DisplayTitle(title, gameWidth, y: 3);
-
-        int recordsStartY = 5;
-        int paddingX = 5;
-        int maxWidth = gameWidth - (paddingX * 2);
-        int maxHeight = gameHeight - 4  - 2;
-    
-        int totalPages = (int)Math.Ceiling((double)leaderboard.Count / maxHeight);
-        _currentLeaderboardPage = Math.Clamp(_currentLeaderboardPage + pageDelta, 0, totalPages );
-
-        AddPaginationOptions(backMenu, _currentLeaderboardPage, totalPages );
-
-        int start = _currentLeaderboardPage * maxHeight;
-        int take = Math.Min(maxHeight, leaderboard.Count - start);
-        var pageItems = leaderboard.GetRange(start, take);
-
-        // Prepare full display list with true rank info
-        List<(int Rank, KeyValuePair<string, int> Entry)> displayItems = [];
-
-        for (int i = 0; i < pageItems.Count; i++)
-        {
-            displayItems.Add((start + i + 1, pageItems[i]));
-        }
-
-        // Add divider and last record only on non-final pages
-        if (_currentLeaderboardPage < totalPages - 1)
-        {
-            displayItems.Add((-1, new KeyValuePair<string, int>("...", 0))); // divider
-            var lastEntry = leaderboard.Last();
-            int lastRank = leaderboard.Count;
-            displayItems.Add((lastRank, lastEntry));
-        }
-
-        PageViewWithRanks(paddingX, recordsStartY, maxWidth, displayItems);
-
-        DisplayHorizontalMenu(backMenu);
-        _input.ReadHorisontalMenuOption(backMenu);
-    }
-    private void DisplayTitle(string title, int width, int y)
-    {
-        int x = (width - title.Length) / 2;
-        Console.SetCursorPosition(x, y);
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine(title);
-        Console.ResetColor();
-    }
-
-    private void AddPaginationOptions(Menu menu, int currentPage, int totalPages)
-    {
-        if (currentPage > 0)
-            menu.Add("Previous page", PreviousPage);
-
-        if (currentPage < totalPages - 1)
-            menu.Add("Next page", NextPage);
-    }
-    private void PreviousPage()
-    {
-        Notify(Event.Rating, -1);
-    }
-    private void NextPage()
-    {
-        Notify(Event.Rating, 1);
-    }
-    private void PageViewWithRanks(int x, int y, int maxWidth, List<(int Rank, KeyValuePair<string, int> Entry)> rankedEntries)
-    {
-        for (int i = 0; i < rankedEntries.Count; i++)
-        {
-            var (rank, entry) = rankedEntries[i];
-
-            Console.SetCursorPosition(x, y + i);
-
-            if (rank == -1)
-            {
-                Console.WriteLine(new string('.', 3)); // Divider line 
-                continue;
-            }
-
-            string name = entry.Key;
-            int score = entry.Value;
-            string rankName = $"{rank}. {name}";
-            string line = rankName + new string('.',maxWidth - score.ToString().Length - rankName.Length) + score;
-            Console.WriteLine(line);
-        }
-    }
-    public void EditSettings()
-    {
-        DisplayMenu(_settingsMenu);
-        _input.ReadMenuOption(_settingsMenu);
-    }
-    public void SetSize()
-    {
-        void SetGameSize(GameSizes size)
-        {
-            if (_mainMenu.Options.TryGetValue("Continue", out _)) _mainMenu.Remove("Continue"); //changing size unable continue 
-            _settings.GameSize = (int)size;
-            SetSize(); // to redraw
-        }
-        string GetLabel(GameSizes size) =>
-            _settings.GameSize == (int)size ? $"● {size}" : size.ToString();
-
-        var _gameSizeMenu = new Menu(new OrderedDictionary<string, Action>{
-            {GetLabel(GameSizes.Normal), () => SetGameSize(GameSizes.Normal)},
-            {GetLabel(GameSizes.Medium), () => SetGameSize(GameSizes.Medium)},
-            {GetLabel(GameSizes.Big),    () => SetGameSize(GameSizes.Big)},
-            {"Back",                      EditSettings},
-        });
-
-        DisplayMenu(_gameSizeMenu);
-        _input.ReadMenuOption(_gameSizeMenu);
-
-    }
-    public void SetSpeed()
-    {
-        void SetGameSpeed(Speeds speed)
-        {
-            _settings.Speed = (int)speed;
-            SetSpeed(); //to redraw
-        }
-
-        string GetLabel(Speeds speed) =>
-            _settings.Speed == (int)speed ? $"● {speed}" : speed.ToString();
-
-        var speedMenu = new Menu(new OrderedDictionary<string, Action> {
-        { GetLabel(Speeds.Slow),     () => SetGameSpeed(Speeds.Slow) },
-        { GetLabel(Speeds.Normal),   () => SetGameSpeed(Speeds.Normal) },
-        { GetLabel(Speeds.Moderate), () => SetGameSpeed(Speeds.Moderate) },
-        { GetLabel(Speeds.Fast),     () => SetGameSpeed(Speeds.Fast) },
-        { "Back",                    EditSettings },
-        });
-
-        DisplayMenu(speedMenu);
-        _input.ReadMenuOption(speedMenu);
-    }
     public void Exit()
     {
         Console.SetCursorPosition(0, 0);
@@ -231,137 +79,13 @@ public class View : IObservable
     {
         menu.GetSelectedAction().Invoke();
     }
-    public void DisplaySnakeInfo(SnakeModel snake)
+    #endregion
+    #region DisplayPublicMethodsw
+    public void DisplayField(Field field)
     {
-        Console.SetCursorPosition(0, 0);
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"Score: {snake.FoodEated}");
-        Console.ResetColor();
+        Console.SetCursorPosition(0, 2);
+        Console.WriteLine(field.Render());
     }
-    public void DisplayHighestScore(string name, int record)
-    {
-        int scoreLineLength = name.Length + 6 + $"{record}".Length;
-        Console.SetCursorPosition(_settings.GameSize * 2 - scoreLineLength, 0);
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"Top♔ - {name}:{record}");
-        Console.ResetColor();
-    }
-    private void DrawBox(int x, int y, int width, int height)
-    {
-        Console.SetCursorPosition(x, y);
-        Console.WriteLine("┌" + new string('─', width - 2) + "┐");
-
-        for (int i = 1; i < height - 1; i++)
-        {
-            Console.SetCursorPosition(x, y + i);
-            Console.WriteLine("│" + new string(' ', width - 2) + "│");
-        }
-
-        Console.SetCursorPosition(x, y + height - 1);
-        Console.WriteLine("└" + new string('─', width - 2) + "┘");
-    }
-
-    private void DisplayCenteredText(string[] lines, int boxStartX, int boxStartY, int boxWidth, int boxHeight)
-    {
-        int contentStartY = boxStartY + (boxHeight - lines.Length) / 2;
-
-        for (int i = 0; i < lines.Length; i++)
-        {
-            int contentStartX = boxStartX + (boxWidth - lines[i].Length) / 2;
-            Console.SetCursorPosition(contentStartX, contentStartY + i);
-            if( lines[i].Trim().Contains("Game Over", StringComparison.OrdinalIgnoreCase)){
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(lines[i]);
-                Console.ResetColor();
-            }else{
-                Console.WriteLine(lines[i]);
-            } 
-        }
-    }
-
-    private string[] BuildGameOverMessage(int score, int rank, int recordsCount)
-    {
-        return
-        [
-        "  Game Over  ",
-        "",
-        $"Your score: {score}",
-        $"Your rank: {rank}/{recordsCount}"
-    ];
-    }
-    private string[] BuildEnterNewName(int score)
-    {
-        return
-        [
-            "Enter your name:",
-            "",
-            "",
-            $"Score: {score}"
-        ];
-    }
-    public string DisplaySaveWindow(int score)
-    {
-        DisplayBackground();
-        const int WindowHeight = 7;
-        const int WindowWidth = 30;
-        int consoleWidth = _settings.GameSize * 2;
-        int consoleHeight = _settings.GameSize;
-
-        // Get box top-left corner
-        (int boxStartX, int boxStartY) = CalculateCenteredPosition(consoleWidth, consoleHeight, WindowWidth, WindowHeight);
-        DrawBox(boxStartX, boxStartY, WindowWidth, WindowHeight);
-
-        var lines = BuildEnterNewName(score);
-        DisplayCenteredText(lines, boxStartX, boxStartY, WindowWidth, WindowHeight);
-
-        // Find coordinates for text input (after "Your name:")
-        //string label = "Your name:";
-        int labelLineIndex = 1; // first line
-        int labelStartX = boxStartX + 1;
-        int inputX = labelStartX + (WindowWidth - lines.Length) / 4;
-        int inputY = boxStartY + ((WindowHeight - lines.Length) / 2) + labelLineIndex;
-        string name = _input.ReadNameInput(inputX, inputY);
-        return name;
-    }
-    public void DisplayBoxWithCenteredMessage(string message)
-    {
-        DisplayBackground();
-
-        const int WindowHeight = 7;
-        const int WindowWidth = 30;
-        int consoleWidth = _settings.GameSize * 2;
-        int consoleHeight = _settings.GameSize;
-
-        (int boxStartX, int boxStartY) = CalculateCenteredPosition(consoleWidth, consoleHeight, WindowWidth, WindowHeight);
-
-        DrawBox(boxStartX, boxStartY, WindowWidth, WindowHeight);
-        DisplayCenteredText([message], boxStartX, boxStartY, WindowWidth, WindowHeight);
-        DisplayHorizontalMenu(_gameOverMenu);
-        _input.ReadHorisontalMenuOption(_gameOverMenu);
-    }
-    public void DisplayGameOver(int score, (int rank, int recordsCount) rate)
-    {
-        DisplayBackground();
-
-        const int WindowHeight = 7;
-        const int WindowWidth = 30;
-        int consoleWidth = _settings.GameSize * 2;
-        int consoleHeight = _settings.GameSize;
-
-        (int boxStartX, int boxStartY) = CalculateCenteredPosition(consoleWidth, consoleHeight, WindowWidth, WindowHeight);
-
-        DrawBox(boxStartX, boxStartY, WindowWidth, WindowHeight);
-        DisplayCenteredText(BuildGameOverMessage(score, rate.rank, rate.recordsCount), boxStartX, boxStartY, WindowWidth, WindowHeight);
-        DisplayHorizontalMenu(_gameOverMenu);
-        _input.ReadHorisontalMenuOption(_gameOverMenu);
-    }
-    public (int startX, int startY) CalculateCenteredPosition(int containerWidth, int containerHeight, int contentWidth, int contentHeight)
-    {
-        int startX = containerWidth > contentWidth ? (containerWidth - contentWidth) / 2 + 1 : 0;
-        int startY = containerHeight > contentHeight ? (containerHeight - contentHeight) / 2 + 2 : 0;
-        return (startX, startY);
-    }
-
     public void DisplayHorizontalMenu(Menu menu)
     {
         _settings.GameState = GameState.Menu;
@@ -429,7 +153,144 @@ public class View : IObservable
                 Console.ResetColor();
         }
     }
-    public void DisplayBackground()
+
+    public void DisplaySnakeInfo(SnakeModel snake)
+    {
+        Console.SetCursorPosition(0, 0);
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"Score: {snake.FoodEated}");
+        Console.ResetColor();
+    }
+    public void DisplayHighestScore(string name, int record)
+    {
+        int scoreLineLength = name.Length + 6 + $"{record}".Length;
+        Console.SetCursorPosition(_settings.GameSize * 2 - scoreLineLength, 0);
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"Top♔ - {name}:{record}");
+        Console.ResetColor();
+    }
+    public void DisplayRecords(List<KeyValuePair<string, int>> leaderboard, int pageDelta = 0)
+    {
+        var backMenu = new Menu(new OrderedDictionary<string, Action>
+    {
+        { "Back", Start },
+    });
+
+        DisplayBackground();
+
+        string title = "♔ Leaderboard ♔";
+        int gameHeight = _settings.GameSize;
+        int gameWidth = _settings.GameSize * 2;
+
+        DisplayTitle(title, gameWidth, y: 3);
+
+        int recordsStartY = 5;
+        int paddingX = 5;
+        int maxWidth = gameWidth - (paddingX * 2);
+        int maxHeight = gameHeight - 4 - 2;
+
+        int totalPages = (int)Math.Ceiling((double)leaderboard.Count / maxHeight);
+        _currentLeaderboardPage = Math.Clamp(_currentLeaderboardPage + pageDelta, 0, totalPages);
+
+        AddPaginationOptions(backMenu, _currentLeaderboardPage, totalPages);
+
+        int start = _currentLeaderboardPage * maxHeight;
+        int take = Math.Min(maxHeight, leaderboard.Count - start);
+        var pageItems = leaderboard.GetRange(start, take);
+
+        // Prepare full display list with true rank info
+        List<(int Rank, KeyValuePair<string, int> Entry)> displayItems = [];
+
+        for (int i = 0; i < pageItems.Count; i++)
+        {
+            displayItems.Add((start + i + 1, pageItems[i]));
+        }
+
+        // Add divider and last record only on non-final pages
+        if (_currentLeaderboardPage < totalPages - 1)
+        {
+            displayItems.Add((-1, new KeyValuePair<string, int>("...", 0))); // divider
+            var lastEntry = leaderboard.Last();
+            int lastRank = leaderboard.Count;
+            displayItems.Add((lastRank, lastEntry));
+        }
+
+        PageViewWithRanks(paddingX, recordsStartY, maxWidth, displayItems);
+
+        DisplayHorizontalMenu(backMenu);
+        _input.ReadHorisontalMenuOption(backMenu);
+    }
+    public void DisplayGameOver(int score, (int rank, int recordsCount) rate)
+    {
+        DisplayBackground();
+
+        const int WindowHeight = 7;
+        const int WindowWidth = 30;
+        int consoleWidth = _settings.GameSize * 2;
+        int consoleHeight = _settings.GameSize;
+
+        (int boxStartX, int boxStartY) = CalculateCenteredPosition(consoleWidth, consoleHeight, WindowWidth, WindowHeight);
+
+        DrawBox(boxStartX, boxStartY, WindowWidth, WindowHeight);
+        DisplayCenteredText(BuildGameOverMessage(score, rate.rank, rate.recordsCount), boxStartX, boxStartY, WindowWidth, WindowHeight);
+        DisplayHorizontalMenu(_gameOverMenu);
+        _input.ReadHorisontalMenuOption(_gameOverMenu);
+    }
+    public string DisplaySaveWindowAndGetName(int score)
+    {
+        DisplayBackground();
+        const int WindowHeight = 7;
+        const int WindowWidth = 30;
+        int consoleWidth = _settings.GameSize * 2;
+        int consoleHeight = _settings.GameSize;
+
+        // Get box top-left corner
+        (int boxStartX, int boxStartY) = CalculateCenteredPosition(consoleWidth, consoleHeight, WindowWidth, WindowHeight);
+        DrawBox(boxStartX, boxStartY, WindowWidth, WindowHeight);
+
+        var lines = BuildEnterNewName(score);
+        DisplayCenteredText(lines, boxStartX, boxStartY, WindowWidth, WindowHeight);
+
+        // Find coordinates for text input (after "Your name:")
+        //string label = "Your name:";
+        int labelLineIndex = 1; // first line
+        int labelStartX = boxStartX + 1;
+        int inputX = labelStartX + (WindowWidth - lines.Length) / 4;
+        int inputY = boxStartY + ((WindowHeight - lines.Length) / 2) + labelLineIndex;
+        string name = _input.ReadNameInput(inputX, inputY);
+        return name;
+    }
+    public void DisplayBoxWithCenteredMessage(string message)
+    {
+        DisplayBackground();
+
+        const int WindowHeight = 7;
+        const int WindowWidth = 30;
+        int consoleWidth = _settings.GameSize * 2;
+        int consoleHeight = _settings.GameSize;
+
+        (int boxStartX, int boxStartY) = CalculateCenteredPosition(consoleWidth, consoleHeight, WindowWidth, WindowHeight);
+
+        DrawBox(boxStartX, boxStartY, WindowWidth, WindowHeight);
+        DisplayCenteredText([message], boxStartX, boxStartY, WindowWidth, WindowHeight);
+        DisplayHorizontalMenu(_gameOverMenu);
+        _input.ReadHorisontalMenuOption(_gameOverMenu);
+    }
+    public void Subscribe(Event eventType, EventListener subscriber)
+    {
+        _events.Subscribe(eventType, subscriber);
+    }
+    public void Unscribe(Event eventType, EventListener subscriber)
+    {
+        _events.Unscribe(eventType, subscriber);
+    }
+    public void Notify(Event eventType, object? args = null)
+    {
+        _events.Notify(eventType, args);
+    }
+    #endregion
+    #region PrivateHelperMethods
+    private void DisplayBackground()
     {
         //Clear header
         Console.SetCursorPosition(0, 0);
@@ -442,30 +303,173 @@ public class View : IObservable
         DisplayField(_backgroundField);
         Console.ResetColor();
         //Clear footer
-        Console.SetCursorPosition(0, _settings.GameSize+4);
+        Console.SetCursorPosition(0, _settings.GameSize + 4);
         Console.Write(new string(' ', _settings.GameSize * 2 + 10));
-        Console.SetCursorPosition(0, _settings.GameSize+5);
+        Console.SetCursorPosition(0, _settings.GameSize + 5);
         Console.Write(new string(' ', _settings.GameSize * 2 + 10));
     }
-    public void Start()
+    private void DisplayTitle(string title, int width, int y)
     {
-        DisplayMenu(_mainMenu);
-        _input.ReadMenuOption(_mainMenu);
+        int x = (width - title.Length) / 2;
+        Console.SetCursorPosition(x, y);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine(title);
+        Console.ResetColor();
+    }
+    private void DrawBox(int x, int y, int width, int height)
+    {
+        Console.SetCursorPosition(x, y);
+        Console.WriteLine("┌" + new string('─', width - 2) + "┐");
+
+        for (int i = 1; i < height - 1; i++)
+        {
+            Console.SetCursorPosition(x, y + i);
+            Console.WriteLine("│" + new string(' ', width - 2) + "│");
+        }
+
+        Console.SetCursorPosition(x, y + height - 1);
+        Console.WriteLine("└" + new string('─', width - 2) + "┘");
+    }
+    private void PageViewWithRanks(int x, int y, int maxWidth, List<(int Rank, KeyValuePair<string, int> Entry)> rankedEntries)
+    {
+        for (int i = 0; i < rankedEntries.Count; i++)
+        {
+            var (rank, entry) = rankedEntries[i];
+
+            Console.SetCursorPosition(x, y + i);
+
+            if (rank == -1)
+            {
+                Console.WriteLine(new string('.', 3)); // Divider line 
+                continue;
+            }
+
+            string name = entry.Key;
+            int score = entry.Value;
+            string rankName = $"{rank}. {name}";
+            string line = rankName + new string('.', maxWidth - score.ToString().Length - rankName.Length) + score;
+            Console.WriteLine(line);
+        }
     }
 
-    public void Subscribe(Event eventType, EventListener subscriber)
+    private void AddPaginationOptions(Menu menu, int currentPage, int totalPages)
     {
-        _events.Subscribe(eventType, subscriber);
+        if (currentPage > 0)
+            menu.Add("Previous page", PreviousPage);
+
+        if (currentPage < totalPages - 1)
+            menu.Add("Next page", NextPage);
+    }
+    private void DisplayCenteredText(string[] lines, int boxStartX, int boxStartY, int boxWidth, int boxHeight)
+    {
+        int contentStartY = boxStartY + (boxHeight - lines.Length) / 2;
+
+        for (int i = 0; i < lines.Length; i++)
+        {
+            int contentStartX = boxStartX + (boxWidth - lines[i].Length) / 2;
+            Console.SetCursorPosition(contentStartX, contentStartY + i);
+            if (lines[i].Trim().Contains("Game Over", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(lines[i]);
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.WriteLine(lines[i]);
+            }
+        }
     }
 
-    public void Unscribe(Event eventType, EventListener subscriber)
+    private string[] BuildGameOverMessage(int score, int rank, int recordsCount)
     {
-        _events.Unscribe(eventType, subscriber);
+        return
+        [
+        "  Game Over  ",
+        "",
+        $"Your score: {score}",
+        $"Your rank: {rank}/{recordsCount}"
+    ];
+    }
+    private string[] BuildEnterNewName(int score)
+    {
+        return
+        [
+            "Enter your name:",
+            "",
+            "",
+            $"Score: {score}"
+        ];
+    }
+    private (int startX, int startY) CalculateCenteredPosition(int containerWidth, int containerHeight, int contentWidth, int contentHeight)
+    {
+        int startX = containerWidth > contentWidth ? (containerWidth - contentWidth) / 2 + 1 : 0;
+        int startY = containerHeight > contentHeight ? (containerHeight - contentHeight) / 2 + 2 : 0;
+        return (startX, startY);
     }
 
-    public void Notify(Event eventType, object? args = null)
+    #endregion
+    #region MenuPrivateMethods
+    private void SetSpeed()
     {
-        _events.Notify(eventType, args);
-    }
+        void SetGameSpeed(Speeds speed)
+        {
+            _settings.Speed = (int)speed;
+            SetSpeed(); //to redraw
+        }
 
+        string GetLabel(Speeds speed) =>
+            _settings.Speed == (int)speed ? $"● {speed}" : speed.ToString();
+
+        var speedMenu = new Menu(new OrderedDictionary<string, Action> {
+        { GetLabel(Speeds.Slow),     () => SetGameSpeed(Speeds.Slow) },
+        { GetLabel(Speeds.Normal),   () => SetGameSpeed(Speeds.Normal) },
+        { GetLabel(Speeds.Moderate), () => SetGameSpeed(Speeds.Moderate) },
+        { GetLabel(Speeds.Fast),     () => SetGameSpeed(Speeds.Fast) },
+        { "Back",                    EditSettings },
+        });
+
+        DisplayMenu(speedMenu);
+        _input.ReadMenuOption(speedMenu);
+    }
+    private void Save()
+    {
+        Notify(Event.Save);
+    }
+    private void EditSettings()
+    {
+        DisplayMenu(_settingsMenu);
+        _input.ReadMenuOption(_settingsMenu);
+    }
+    private void SetSize()
+    {
+        void SetGameSize(GameSizes size)
+        {
+            if (_mainMenu.Options.TryGetValue("Continue", out _)) _mainMenu.Remove("Continue"); //changing size unable continue 
+            _settings.GameSize = (int)size;
+            SetSize(); // to redraw
+        }
+        string GetLabel(GameSizes size) =>
+            _settings.GameSize == (int)size ? $"● {size}" : size.ToString();
+
+        var _gameSizeMenu = new Menu(new OrderedDictionary<string, Action>{
+            {GetLabel(GameSizes.Normal), () => SetGameSize(GameSizes.Normal)},
+            {GetLabel(GameSizes.Medium), () => SetGameSize(GameSizes.Medium)},
+            {GetLabel(GameSizes.Big),    () => SetGameSize(GameSizes.Big)},
+            {"Back",                      EditSettings},
+        });
+
+        DisplayMenu(_gameSizeMenu);
+        _input.ReadMenuOption(_gameSizeMenu);
+
+    }
+    private void PreviousPage()
+    {
+        Notify(Event.Rating, -1);
+    }
+    private void NextPage()
+    {
+        Notify(Event.Rating, 1);
+    }
+    #endregion
 }

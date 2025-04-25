@@ -58,7 +58,8 @@ public class Controller
         var rate = GetRank(_snake.FoodEated);
         _view.DisplayGameOver(_snake.FoodEated, rate);
     }
-    private (int rank, int recordsCount) GetRank(int score){
+    private (int rank, int recordsCount) GetRank(int score)
+    {
         var ranks = new List<int>();
         _db.Records.ToList().ForEach(pair => pair.Value.ForEach(score => ranks.Add(score)));
         ranks.Add(score);
@@ -67,7 +68,7 @@ public class Controller
     }
     public void SaveRecord()
     {
-        string name = _view.DisplaySaveWindow(_snake.FoodEated);
+        string name = _view.DisplaySaveWindowAndGetName(_snake.FoodEated);
         _db.AddRecord(name, _snake.FoodEated);
         if (_db.SaveToCSV())
         {
