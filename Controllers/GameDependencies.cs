@@ -73,7 +73,7 @@ public class GameDependencies
     {
         switch (Settings.GameState)
         {
-            case GameState.Menu:
+            case GameState.Menu or GameState.Pause:
                 SubscribeMenuState();
                 break;
             case GameState.Game:
@@ -82,6 +82,7 @@ public class GameDependencies
             case GameState.Over:
                 SubscribeOverState();
                 break;
+
         }
     }
 

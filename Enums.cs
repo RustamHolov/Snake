@@ -49,5 +49,6 @@ public enum GameState
 {
     Menu,
     Game,
-    Over
+    Over,
+    Pause
 }

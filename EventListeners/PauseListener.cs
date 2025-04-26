@@ -9,8 +9,8 @@ public class PauseListener : EventListener
 
     public void Update(object? args = null)
     {
-        _controller.Settings.GameState = GameState.Menu;
         _controller.GameRuning = false;
+        _controller.Settings.GameState = GameState.Pause;
         _view.OnPause();
     }
 }

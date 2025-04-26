@@ -29,7 +29,7 @@ public class View : IObservable
         _settingsMenu = new Menu(new OrderedDictionary<string, Action>(){
             { "Game size", SetSize},
             { "Speed", SetSpeed},
-            { "Back", Start}
+            { "Back", Back}
         });
         _gameOverMenu = new Menu(new OrderedDictionary<string, Action>(){
             { "New game", NewGame},
@@ -80,7 +80,8 @@ public class View : IObservable
         menu.GetSelectedAction().Invoke();
     }
     #endregion
-    #region DisplayPublicMethodsw
+
+    #region DisplayPublicMethods
     public void DisplayField(Field field)
     {
         Console.SetCursorPosition(0, 2);
@@ -88,8 +89,10 @@ public class View : IObservable
     }
     public void DisplayHorizontalMenu(Menu menu)
     {
-        _settings.GameState = GameState.Menu;
-
+        if (_settings.GameState != GameState.Pause)
+        {
+            _settings.GameState = GameState.Menu;
+        }
         var optionKeys = menu.Options.Keys.ToList();
         if (optionKeys.Count == 0) return;
 
@@ -121,7 +124,9 @@ public class View : IObservable
     }
     public void DisplayMenu(Menu menu)
     {
-        _settings.GameState = GameState.Menu;
+        if(_settings.GameState != GameState.Pause){
+            _settings.GameState = GameState.Menu;
+        }
         DisplayBackground();
 
         var options = menu.Options.Keys.ToList();
@@ -153,7 +158,6 @@ public class View : IObservable
                 Console.ResetColor();
         }
     }
-
     public void DisplaySnakeInfo(SnakeModel snake)
     {
         Console.SetCursorPosition(0, 0);
@@ -173,7 +177,7 @@ public class View : IObservable
     {
         var backMenu = new Menu(new OrderedDictionary<string, Action>
     {
-        { "Back", Start },
+        { "Back", Back },
     });
 
         DisplayBackground();
@@ -289,6 +293,7 @@ public class View : IObservable
         _events.Notify(eventType, args);
     }
     #endregion
+
     #region PrivateHelperMethods
     private void DisplayBackground()
     {
@@ -409,6 +414,7 @@ public class View : IObservable
     }
 
     #endregion
+
     #region MenuPrivateMethods
     private void SetSpeed()
     {
@@ -431,6 +437,13 @@ public class View : IObservable
 
         DisplayMenu(speedMenu);
         _input.ReadMenuOption(speedMenu);
+    }
+    private void Back(){
+        if(_settings.GameState == GameState.Pause){
+            OnPause();
+        }else{
+            Start();
+        }
     }
     private void Save()
     {
@@ -472,4 +485,5 @@ public class View : IObservable
         Notify(Event.Rating, 1);
     }
     #endregion
+
 }
