@@ -26,13 +26,12 @@ Customizable settings: Speed, Field Size, Continue Previous Game
 Event-driven architecture for clean separation between input, logic, and rendering
 
 🛠️ Patterns and Concepts Used
-
-Concept	Description
-Observer Pattern	Models like SnakeModel, Field, and Input use event listeners to react to player actions.
-Dependency Injection	GameDependencies manually builds and injects all necessary game components.
-Separation of Concerns	Controller, View, Input, Field, Snake, and Settings all have distinct responsibilities.
-Double Buffering	Frames are built off-screen (in memory) and flushed to the console in one pass for smooth visuals.
-Pagination Logic	Leaderboard is split into multiple pages with dynamic navigation and "trailer" for lowest score.
+Concept | Description
+Observer Pattern | Models like SnakeModel, Field, and Input use event listeners to react to player actions.
+Dependency Injection | GameDependencies manually builds and injects all necessary game components.
+Separation of Concerns | Controller, View, Input, Field, Snake, and Settings all have distinct responsibilities.
+Double Buffering | Frames are built off-screen (in memory) and flushed to the console in one pass for smooth visuals.
+Pagination Logic | Leaderboard is split into multiple pages with dynamic navigation and "trailer" for lowest score.
 📦 Project Structure Overview
 rust
 Copy
