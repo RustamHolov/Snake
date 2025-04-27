@@ -1,4 +1,4 @@
-# 🐍 Snake (Console Game) — Study Project
+# 🐍 Snake (Console Game)
 
 #### Welcome to my personal take on the classic Snake game, built in pure C# for the console. 
 #### This project is part of my learning journey to study game architecture, event-driven systems, and clean code principles.
