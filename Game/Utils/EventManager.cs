@@ -1,12 +1,13 @@
-public class EventManager 
+public class EventManager
 {
-    private Dictionary<Event, List<EventListener>> _listeners;
+    private Dictionary<Event, List<IEventListener>> _listeners;
     public EventManager()
     {
-        _listeners = new Dictionary<Event, List<EventListener>>();
+        _listeners = new Dictionary<Event, List<IEventListener>>();
     }
 
-    public void Notify(Event eventType, object? args = null){
+    public void Notify(Event eventType, object? args = null)
+    {
         if (_listeners.ContainsKey(eventType))
         {
             foreach (var listener in _listeners[eventType])
@@ -15,16 +16,16 @@ public class EventManager
             }
         }
     }
-    public void Subscribe(Event eventType, EventListener subscriber)
+    public void Subscribe(Event eventType, IEventListener subscriber)
     {
         if (!_listeners.ContainsKey(eventType))
         {
-            _listeners[eventType] = new List<EventListener>();
+            _listeners[eventType] = new List<IEventListener>();
         }
         _listeners[eventType].Add(subscriber);
     }
 
-    public void Unscribe(Event eventType, EventListener subscriber)
+    public void Unscribe(Event eventType, IEventListener subscriber)
     {
         if (_listeners.ContainsKey(eventType))
         {

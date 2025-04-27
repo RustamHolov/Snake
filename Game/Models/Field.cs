@@ -16,14 +16,14 @@ public class Field : IRenderable, IObservable
     private Dictionary<Cell, (int, int)> _snakeLocation = new Dictionary<Cell, (int, int)>();
     private static readonly Random _random = new Random();
     public EventManager Events { get => _events; set { _events = value; } }
-    public int Size { get => _cellSize; set{ _cellSize = value;}}
-    public int Height { get => _height; set{_height = value;} }
+    public int Size { get => _cellSize; set { _cellSize = value; } }
+    public int Height { get => _height; set { _height = value; } }
 
-    public int Width { get => _width * 2; set {_width = value;} }
+    public int Width { get => _width * 2; set { _width = value; } }
 
-    public Cell[,] Grid { get => _grid; private set {_grid = value;}}
+    public Cell[,] Grid { get => _grid; private set { _grid = value; } }
 
-    public char[,] Canvas { get => _canvas; private set{ _canvas = value;} }
+    public char[,] Canvas { get => _canvas; private set { _canvas = value; } }
     public SnakeModel Snake { get => _snake; }
     public Dictionary<(int, int), (int, int)> CellPixelMap { get => _cellPixelMap; private set { _cellPixelMap = value; } }
 
@@ -91,7 +91,8 @@ public class Field : IRenderable, IObservable
         }
         Notify(Event.Place, this);
     }
-    public void SetSize(int size){
+    public void SetSize(int size)
+    {
         _height = size;
         _width = size;
         GetRidOfSnake();
@@ -100,10 +101,11 @@ public class Field : IRenderable, IObservable
         _cellPixelMap = BuildCellPixelMapping();
         FillCanvas();
     }
-    public void GetRidOfSnake(){
+    public void GetRidOfSnake()
+    {
         _snakeLocation.Clear();
     }
-    public void FillCanvas()    
+    public void FillCanvas()
     {
         for (int i = 0; i < _grid.GetLength(0); i++)
         {
@@ -136,7 +138,7 @@ public class Field : IRenderable, IObservable
         }
         // Calculate total width of the box
         int boxWidth = cols * maxStringLength + 2; // +2 for the box borders
-        
+
         StringBuilder result = new StringBuilder();
 
         // Draw top border
@@ -247,12 +249,12 @@ public class Field : IRenderable, IObservable
         _grid[spawnPosition.x, spawnPosition.y] = food;
     }
 
-    public void Subscribe(Event eventType, EventListener subscriber)
+    public void Subscribe(Event eventType, IEventListener subscriber)
     {
         _events.Subscribe(eventType, subscriber);
     }
 
-    public void Unscribe(Event eventType, EventListener subscriber)
+    public void Unscribe(Event eventType, IEventListener subscriber)
     {
         _events.Unscribe(eventType, subscriber);
     }

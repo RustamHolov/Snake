@@ -1,6 +1,6 @@
 using Snake;
 
-public class NewGameListener : EventListener
+public class NewGameListener : IEventListener
 {
     private GameDependencies _gameDependencies;
     public NewGameListener(GameDependencies gameDependencies)

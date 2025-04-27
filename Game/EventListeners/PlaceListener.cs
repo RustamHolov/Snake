@@ -1,4 +1,4 @@
-public class PlaceListener : EventListener
+public class PlaceListener : IEventListener
 {
     private View _view;
     public PlaceListener(View view)

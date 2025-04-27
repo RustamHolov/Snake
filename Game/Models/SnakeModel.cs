@@ -38,22 +38,28 @@ public class SnakeModel : IObservable
         {
             return; // Cannot move in the opposite direction
         }
-        if(_moveDirection == Vector.NotMoving){ // to start the game (first move)
+        if (_moveDirection == Vector.NotMoving)
+        { // to start the game (first move)
             _moveDirection = direction;
             _turns.Enqueue(direction);
-        }else{
+        }
+        else
+        {
             _turns.Enqueue(direction);
         }
-        
+
     }
     public void Move()
     {
         if (_moveDirection != Vector.NotMoving)
         {
-            if (_turns.Count > 0){
+            if (_turns.Count > 0)
+            {
                 _moveDirection = _turns.Dequeue();
                 Notify(Event.Move, _moveDirection);
-            }else{
+            }
+            else
+            {
                 Notify(Event.Move, _moveDirection);
             }
         }
@@ -68,12 +74,12 @@ public class SnakeModel : IObservable
         Notify(Event.Eat, this);
     }
 
-    public void Subscribe(Event eventType, EventListener subscriber)
+    public void Subscribe(Event eventType, IEventListener subscriber)
     {
         _events.Subscribe(eventType, subscriber);
     }
 
-    public void Unscribe(Event eventType, EventListener subscriber)
+    public void Unscribe(Event eventType, IEventListener subscriber)
     {
         _events.Unscribe(eventType, subscriber);
     }

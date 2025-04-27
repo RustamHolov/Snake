@@ -1,8 +1,9 @@
-public class GameOverListener : EventListener
+public class GameOverListener : IEventListener
 {
     private Controller _controller;
 
-    public GameOverListener(Controller controller){
+    public GameOverListener(Controller controller)
+    {
         _controller = controller;
     }
     public void Update(object? args = null)

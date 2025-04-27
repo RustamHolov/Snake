@@ -1,4 +1,4 @@
-public class EatListener : EventListener
+public class EatListener : IEventListener
 {
     private View _view;
     public EatListener(View view)

@@ -1,4 +1,4 @@
-public class RatingListener : EventListener
+public class RatingListener : IEventListener
 {
     private Controller _controller;
     public RatingListener(Controller controller)
@@ -15,6 +15,6 @@ public class RatingListener : EventListener
         {
             _controller.ViewLeaderboard();
         }
-        
+
     }
 }

@@ -1,6 +1,8 @@
-public class ContinueListener : EventListener{
+public class ContinueListener : IEventListener
+{
     private Controller _controller;
-    public ContinueListener(Controller controller){
+    public ContinueListener(Controller controller)
+    {
         _controller = controller;
     }
 

@@ -48,7 +48,7 @@ public class Controller
                 _snake.Move();
                 lastUpdate = elapsed;
             }
-            Thread.Sleep(5);
+            Thread.Sleep(1);
         }
     }
     public void GameOver()

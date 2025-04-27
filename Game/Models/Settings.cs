@@ -54,12 +54,12 @@ public class Settings : IObservable
         _events.Notify(eventType, args);
     }
 
-    public void Subscribe(Event eventType, EventListener subscriber)
+    public void Subscribe(Event eventType, IEventListener subscriber)
     {
         _events.Subscribe(eventType, subscriber);
     }
 
-    public void Unscribe(Event eventType, EventListener subscriber)
+    public void Unscribe(Event eventType, IEventListener subscriber)
     {
         _events.Unscribe(eventType, subscriber);
     }

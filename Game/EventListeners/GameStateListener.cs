@@ -1,4 +1,5 @@
-public class GameStateListener : EventListener{
+public class GameStateListener : IEventListener
+{
     private GameDependencies _gameDependencies;
     public GameStateListener(GameDependencies gameDependencies)
     {

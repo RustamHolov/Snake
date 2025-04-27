@@ -1,8 +1,9 @@
-public class PauseListener : EventListener
+public class PauseListener : IEventListener
 {
     private Controller _controller;
     private View _view;
-    public PauseListener(Controller controller, View view){
+    public PauseListener(Controller controller, View view)
+    {
         _controller = controller;
         _view = view;
     }

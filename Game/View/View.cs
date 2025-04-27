@@ -124,7 +124,8 @@ public class View : IObservable
     }
     public void DisplayMenu(Menu menu)
     {
-        if(_settings.GameState != GameState.Pause){
+        if (_settings.GameState != GameState.Pause)
+        {
             _settings.GameState = GameState.Menu;
         }
         DisplayBackground();
@@ -280,11 +281,11 @@ public class View : IObservable
         DisplayHorizontalMenu(_gameOverMenu);
         _input.ReadHorisontalMenuOption(_gameOverMenu);
     }
-    public void Subscribe(Event eventType, EventListener subscriber)
+    public void Subscribe(Event eventType, IEventListener subscriber)
     {
         _events.Subscribe(eventType, subscriber);
     }
-    public void Unscribe(Event eventType, EventListener subscriber)
+    public void Unscribe(Event eventType, IEventListener subscriber)
     {
         _events.Unscribe(eventType, subscriber);
     }
@@ -438,10 +439,14 @@ public class View : IObservable
         DisplayMenu(speedMenu);
         _input.ReadMenuOption(speedMenu);
     }
-    private void Back(){
-        if(_settings.GameState == GameState.Pause){
+    private void Back()
+    {
+        if (_settings.GameState == GameState.Pause)
+        {
             OnPause();
-        }else{
+        }
+        else
+        {
             Start();
         }
     }

@@ -13,7 +13,7 @@ public class Input : IObservable
     {
         while (true)
         {
-            if(Console.KeyAvailable)
+            if (Console.KeyAvailable)
             {
                 switch (Console.ReadKey(true).Key)
                 {
@@ -30,7 +30,8 @@ public class Input : IObservable
             }
         }
     }
-    public void ReadHorisontalMenuOption(Menu menu){
+    public void ReadHorisontalMenuOption(Menu menu)
+    {
         while (true)
         {
             if (Console.KeyAvailable)
@@ -50,20 +51,22 @@ public class Input : IObservable
             }
         }
     }
-    public void ReadSnakeControll(){
+    public void ReadSnakeControll()
+    {
         ConsoleKey? latestKey = null;
         while (Console.KeyAvailable)
         {
             latestKey = Console.ReadKey(true).Key;
         }
-        if (latestKey.HasValue){
+        if (latestKey.HasValue)
+        {
             switch (latestKey)
             {
                 case ConsoleKey.W or ConsoleKey.UpArrow: Notify(Event.SnakeTurn, Vector.Up); break;
                 case ConsoleKey.S or ConsoleKey.DownArrow: Notify(Event.SnakeTurn, Vector.Down); break;
                 case ConsoleKey.A or ConsoleKey.LeftArrow: Notify(Event.SnakeTurn, Vector.Left); break;
                 case ConsoleKey.D or ConsoleKey.RightArrow: Notify(Event.SnakeTurn, Vector.Right); break;
-                case ConsoleKey.Escape : Notify(Event.Pause); break;
+                case ConsoleKey.Escape: Notify(Event.Pause); break;
                 default: break;
             }
         }
@@ -83,7 +86,8 @@ public class Input : IObservable
         {
             var key = Console.ReadKey(true);
 
-            if(key.Key == ConsoleKey.Escape){
+            if (key.Key == ConsoleKey.Escape)
+            {
                 Notify(Event.GameOver);
             }
 
@@ -131,16 +135,17 @@ public class Input : IObservable
         Console.Write(new string(' ', 15));
     }
 
-    public void Notify(Event eventType, object? args = null){
+    public void Notify(Event eventType, object? args = null)
+    {
         _events.Notify(eventType, args);
     }
 
-    public void Subscribe(Event eventType, EventListener subscriber)
+    public void Subscribe(Event eventType, IEventListener subscriber)
     {
         _events.Subscribe(eventType, subscriber);
     }
 
-    public void Unscribe(Event eventType, EventListener subscriber)
+    public void Unscribe(Event eventType, IEventListener subscriber)
     {
         _events.Unscribe(eventType, subscriber);
     }

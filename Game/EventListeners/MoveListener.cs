@@ -1,4 +1,4 @@
-public class MoveListener : EventListener
+public class MoveListener : IEventListener
 {
     private Field _field;
     public MoveListener(Field field)

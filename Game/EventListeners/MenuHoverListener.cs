@@ -1,4 +1,4 @@
-public class MenuHoverListener : EventListener
+public class MenuHoverListener : IEventListener
 {
     private View _view;
 
